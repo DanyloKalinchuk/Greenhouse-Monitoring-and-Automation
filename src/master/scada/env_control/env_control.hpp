@@ -2,9 +2,11 @@
 #define ENV_CONTROL
 
 #include "../radio_comm/radio_comm.hpp"
+#include <map>
 
 class EnvControl{
-    static SENS_FRAME last_received;
+    SENS_FRAME last_received;
+    std::map<uint8_t, SENS_FRAME> last_records;
 
     public:
     EnvControl();
