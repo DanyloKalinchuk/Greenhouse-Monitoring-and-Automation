@@ -3,4 +3,4 @@
 **Work in progress**
 
 ## Overall Architecture
-![Alt text](recourses\Greenhouse_Automation_Architecture.png)
+![Project Architecture](./recourses/Greenhouse_Automation_Architecture.png)
