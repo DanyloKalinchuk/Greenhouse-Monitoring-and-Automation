@@ -70,7 +70,7 @@ Radio::Radio(){
 
     if (!this->radio.begin()){
         this->radio_logs.log_out(MASTER_ID, MasterFail);
-        throw new std::runtime_error("Failed to initialize the radio module");
+        throw std::runtime_error("Failed to initialize the radio module");
     }
     pr_info("Radio module initialized");
 

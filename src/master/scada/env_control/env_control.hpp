@@ -59,7 +59,7 @@ class EnvControl{
     ~EnvControl();
 
     void set_param(EnvParams env_param, int16_t X_perf, uint8_t X_error);
-    std::map<uint8_t, std::pair<SENS_FRAME, uint64_t> get_last_records();
+    std::map<uint8_t, std::pair<SENS_FRAME, uint64_t>> get_last_records();
 };
 
 #endif

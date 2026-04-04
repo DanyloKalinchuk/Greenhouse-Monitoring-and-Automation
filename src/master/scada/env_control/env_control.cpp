@@ -1,7 +1,7 @@
 #include "env_control.hpp"
 
 void EnvControl::handle_ctr(){
-    while (this->thread_on.load()){
+    while (this->ctr_on.load()){
         if (this->frame_buff.sensor_id != DEFAULT_ID){
             SENS_FRAME frame = this->frame_buff;
             this->frame_buff.sensor_id = DEFAULT_ID;
@@ -70,12 +70,20 @@ EnvControl::~EnvControl(){
 void EnvControl::set_param(EnvParams env_param, int16_t X_perf, uint8_t X_error){
     switch (env_param){
         case ENV_TEMPERATURE:
-            this->temp_perf.store(X_perf);
-            this->temp_error.store(X_error);
+            this->temp_perf = X_perf;
+            this->temp_error = X_error;
             break;
         case ENV_HUMIDITY:
-            this->hum_perf.store(X_perf);
-            this->hum_error.store(X_error);
+            this->hum_perf = X_perf;
+            this->hum_error = X_error;
+            break;
+        case ENV_MOISTURE:
+            this->moist_perf = X_perf;
+            this->moist_error = X_error;
+            break;
+        case ENV_CO2:
+            this->co2_perf = X_perf;
+            this->co2_error = X_error;
             break;
     }
 }
