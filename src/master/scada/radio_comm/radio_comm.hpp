@@ -41,10 +41,10 @@ class Radio{
     private:
     void read_data_on_disk();
     void update_data_on_disk();
-    void clean_data_on_disk();
 
     public:
     Radio();
+    ~Radio();
 
     SENS_FRAME handle_communications();
 };

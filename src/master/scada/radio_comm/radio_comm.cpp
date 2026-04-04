@@ -1,5 +1,69 @@
 #include "radio_comm.hpp"
 
+void Radio::read_data_on_disk(){
+    std::fstream saved_sensors(SAVE_PATH, std::ios::in | std::ios::binary);
+    if (!saved_sensors.is_open()){
+        this->radio_logs.log_out(MASTER_ID, MasterFail);
+        throw std::runtime_error((std::string)("Failed to open the save file: ") + (std::string)SAVE_PATH);
+    }
+
+    if (saved_sensors.peek() == std::fstream::eof()){
+        saved_sensors.close();
+        return;
+    }
+
+    saved_sensors.read(reinterpret_cast<char *>(&this->next_sens_id), sizeof(this->next_sens_id));
+    if (saved_sensors.fail()){
+        this->radio_logs.log_out(MASTER_ID, MasterFail);
+        saved_sensors.close();
+        throw std::runtime_error("Failed to read next_sens_id value");
+    }
+
+    for (int i = 0; i < (this->next_sens_id - 1); i++){
+        uint8_t key, id;
+        saved_sensors.read(reinterpret_cast<char *>(&key), sizeof(key));
+        saved_sensors.read(reinterpret_cast<char *>(&id), sizeof(id));
+        
+        if (saved_sensors.fail()){
+            this->radio_logs.log_out(MASTER_ID, MasterFail);
+            saved_sensors.close();
+            throw std::runtime_error("Failed to read id map entry");
+        }
+
+        this->reg_sensors[key] = id;
+    }
+
+    saved_sensors.close();
+}
+
+void Radio::update_data_on_disk(){
+    std::fstream saved_sensors(SAVE_PATH, std::ios::out | std::ios::binary | std::ios::trunc);
+    if (!saved_sensors.is_open()){
+        this->radio_logs.log_out(MASTER_ID, MasterFail);
+        throw std::runtime_error((std::string)("Failed to open the save file: ") + (std::string)SAVE_PATH);
+    }
+
+    saved_sensors.write(reinterpret_cast<char *>(&this->next_sens_id), sizeof(this->next_sens_id));
+    if (saved_sensors.fail()){
+        this->radio_logs.log_out(MASTER_ID, MasterFail);
+        saved_sensors.close();
+        throw std::runtime_error("Failed to write next_sens_id value");
+    }
+
+    for (const auto [key, id] : this->reg_sensors){
+        saved_sensors.write(reinterpret_cast<char *>(&key), sizeof(key));
+        saved_sensors.write(reinterpret_cast<char *>(&id), sizeof(id));
+
+        if (saved_sensors.fail()){
+            this->radio_logs.log_out(MASTER_ID, MasterFail);
+            saved_sensors.close();
+            throw std::runtime_error("Failed to write id map entry");
+        }
+    }
+
+    saved_sensors.close();
+}
+
 Radio::Radio(){
     this->radio_logs.log_out(MASTER_ID, MasterStart);
     this->radio = RF24(CE, CS);
@@ -19,6 +83,10 @@ Radio::Radio(){
     this->radio.startListening();
     this->radio.openReadPipe(INIT_PIPE, (uint8_t*)(INIT_ADDRESS));
     this->radio.openReadPipe(DATA_PIPE, (uint64_t)(MASTER_ID));
+}
+
+Radio::~Radio(){
+    update_data_on_disk();
 }
 
 SENS_FRAME Radio::handle_communications(){
@@ -53,7 +121,7 @@ SENS_FRAME Radio::handle_communications(){
 
         this->radio.stopListening();
         for (int i = 0; i < 50; i++){
-            if (this->radio.write(&master_id, sizeof(master_id));){
+            if (this->radio.write(&master_id, sizeof(master_id))){
                 break;
             }
         }
@@ -63,7 +131,6 @@ SENS_FRAME Radio::handle_communications(){
         this->radio.openReadPipe(DATA_PIPE, (uint64_t)(MASTER_ID));
 
         sens_frame.sensor_id = DEFAULT_ID;
-        return sens_frame;
 
     }else if (curr_pipe == DATA_PIPE){
         uint32_t sensor_data[5];
@@ -84,8 +151,7 @@ SENS_FRAME Radio::handle_communications(){
         sens_frame.temperature = sensor_data[2];
         sens_frame.co2 = 0;
         sens_frame.soil_moisture = 0;
-
-        return sens_frame;
     }
 
+    return sens_frame;
 }
