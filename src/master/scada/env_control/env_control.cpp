@@ -6,7 +6,8 @@ void EnvControl::handle_ctr(){
             SENS_FRAME frame = this->frame_buff;
             this->frame_buff.sensor_id = DEFAULT_ID;
 
-            this->last_records[frame.sensor_id] = frame;
+            std::chrono::time_point now = std::chrono::system_clock::now();
+            this->last_records[frame.sensor_id] = {frame, std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count()};
             this->check_params(frame);
         }
     }
@@ -17,6 +18,32 @@ void EnvControl::handle_comm(){
         if (this->frame_buff.sensor_id == DEFAULT_ID){
             this->frame_buff = this->radio.handle_communications();
         }
+    }
+}
+
+void EnvControl::check_params(SENS_FRAME frame){
+    if (frame.temperature > (this->temp_perf + this->temp_error)){
+        this->change_parameter(ENV_TEMPERATURE, false);
+    }else if (frame.temperature < (this->temp_perf - this->temp_error)){
+        this->change_parameter(ENV_TEMPERATURE, true);
+    }
+
+    if (frame.humidity > (this->hum_perf + this->hum_error)){
+        this->change_parameter(ENV_HUMIDITY, false);
+    }else if (frame.humidity < (this->hum_perf - this->hum_error)){
+        this->change_parameter(ENV_HUMIDITY, true);
+    }
+
+    if (frame.soil_moisture > (this->moist_perf + this->moist_error)){
+        this->change_parameter(ENV_MOISTURE, false);
+    }else if (frame.soil_moisture < (this->moist_perf - this->moist_error)){
+        this->change_parameter(ENV_MOISTURE, true);
+    }
+
+    if (frame.co2 > (this->co2_perf + this->co2_error)){
+        this->change_parameter(ENV_CO2, false);
+    }else if (frame.temperature < (this->co2_perf - this->co2_error)){
+        this->change_parameter(ENV_CO2, true);
     }
 }
 
@@ -53,6 +80,6 @@ void EnvControl::set_param(EnvParams env_param, int16_t X_perf, uint8_t X_error)
     }
 }
 
-map<uint8_t, SENS_FRAME> EnvControl::get_last_records(){
+std::map<uint8_t, std::pair<SENS_FRAME, uint64_t>> EnvControl::get_last_records(){
     return this->last_records;
 }
