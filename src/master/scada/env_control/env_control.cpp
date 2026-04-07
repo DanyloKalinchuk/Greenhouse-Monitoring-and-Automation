@@ -42,7 +42,7 @@ void EnvControl::check_params(SENS_FRAME frame){
 
     if (frame.co2 > (this->co2_perf + this->co2_error)){
         this->change_parameter(ENV_CO2, false);
-    }else if (frame.temperature < (this->co2_perf - this->co2_error)){
+    }else if (frame.co2 < (this->co2_perf - this->co2_error)){
         this->change_parameter(ENV_CO2, true);
     }
 }
