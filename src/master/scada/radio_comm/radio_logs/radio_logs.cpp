@@ -13,10 +13,12 @@ RadioLogs::~RadioLogs(){
 }
 
 void RadioLogs::log_out(uint8_t initiator_id, MsgType msg_type){
-    std::string log_msg = asctime(&this->datetime);
+    time_t timestamp = std::time(NULL);
+    struct tm datetime = *localtime(&timestamp);
+    std::string log_msg = asctime(&datetime);
     
     log_msg += " | Initiator ID: ";
-    log_msg += initiator_id;
+    log_msg += std::to_string(initiator_id);
 
     log_msg += " | Message type: ";
     switch (msg_type){
@@ -25,6 +27,9 @@ void RadioLogs::log_out(uint8_t initiator_id, MsgType msg_type){
             break;
         case MasterFail:
             log_msg += "MasterFail\n";
+            break;
+        case SensorRegistered:
+            log_msg += "SensorRegistered\n";
             break;
         case SensorInit:
             log_msg += "SensorInit\n";

@@ -64,6 +64,46 @@ void Radio::update_data_on_disk(){
     saved_sensors.close();
 }
 
+void Radio::sensor_init(uint8_t sensor_id){
+    bool is_registered = false;
+    uint8_t inner_id;
+
+    for (const auto [key, id] : this->reg_sensors){
+        if (key == sensor_id){
+            is_registered = true;
+            inner_id = id;
+            break;
+        }
+    }
+
+    if (!is_registered){
+        this->reg_sensors[sensor_id] = this->next_sens_id;
+        inner_id = this->next_sens_id;
+        this->next_sens_id++;
+        this->radio_logs.log_out(inner_id, SensorRegistered);
+    }
+
+    this->radio_logs.log_out(inner_id, SensorInit);
+}
+
+void Radio::sensor_handle_data(uint32_t sensor_data[SENSOR_DATA_SIZE], SENS_FRAME* sens_frame){
+    sens_frame->sensor_id = DEFAULT_ID;
+
+        for (const auto [key, id] : this->reg_sensors){
+            if (key == sensor_data[0]){
+                sens_frame->sensor_id = id;
+                break;
+            }
+        }
+
+        this->radio_logs.log_out(sens_frame->sensor_id, SensorRead);
+
+        sens_frame->humidity = sensor_data[1];
+        sens_frame->temperature = sensor_data[2];
+        sens_frame->co2 = 0;
+        sens_frame->soil_moisture = 0;
+}
+
 Radio::Radio(){
     this->radio_logs.log_out(MASTER_ID, MasterStart);
     this->radio = RF24(CE, CS);
@@ -85,6 +125,11 @@ Radio::Radio(){
     this->radio.openReadPipe(DATA_PIPE, (uint64_t)(MASTER_ID));
 }
 
+Radio::Radio(uint8_t dummy){
+    this->radio_logs.log_out(MASTER_ID, MasterStart);
+    this->read_data_on_disk();
+}
+
 Radio::~Radio(){
     update_data_on_disk();
 }
@@ -100,24 +145,7 @@ SENS_FRAME Radio::handle_communications(){
         uint8_t sensor_id;
         this->radio.read(&sensor_id, sizeof(sensor_id));
 
-        bool is_registered = false;
-        uint8_t inner_id;
-
-        for (const auto [key, id] : this->reg_sensors){
-            if (key == sensor_id){
-                is_registered = true;
-                inner_id = id;
-                break;
-            }
-        }
-
-        if (!is_registered){
-            this->reg_sensors[sensor_id] = this->next_sens_id;
-            inner_id = this->next_sens_id;
-            this->next_sens_id++;
-        }
-
-        this->radio_logs.log_out(inner_id, SensorInit);
+        this->sensor_init(sensor_id);
 
         this->radio.stopListening();
         for (int i = 0; i < 50; i++){
@@ -133,24 +161,10 @@ SENS_FRAME Radio::handle_communications(){
         sens_frame.sensor_id = DEFAULT_ID;
 
     }else if (curr_pipe == DATA_PIPE){
-        uint32_t sensor_data[5];
+        uint32_t sensor_data[SENSOR_DATA_SIZE];
 
         this->radio.read(&sensor_data, sizeof(sensor_data));
-        sens_frame.sensor_id = DEFAULT_ID;
-
-        for (const auto [key, id] : this->reg_sensors){
-            if (key == sensor_data[0]){
-                sens_frame.sensor_id = id;
-                break;
-            }
-        }
-
-        this->radio_logs.log_out(sens_frame.sensor_id, SensorRead);
-
-        sens_frame.humidity = sensor_data[1];
-        sens_frame.temperature = sensor_data[2];
-        sens_frame.co2 = 0;
-        sens_frame.soil_moisture = 0;
+        this->sensor_handle_data(sensor_data, &sens_frame);
     }
 
     return sens_frame;

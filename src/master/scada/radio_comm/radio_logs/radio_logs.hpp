@@ -11,6 +11,7 @@
 enum MsgType{
     MasterStart,
     MasterFail,
+    SensorRegistered,
     SensorInit,
     SensorRead
 };
@@ -18,8 +19,6 @@ enum MsgType{
 
 class RadioLogs{
     std::fstream log_file;
-    time_t timestamp time(NULL);
-    struct tm datetime = *localtime(&timestamp);
     
     public:
     RadioLogs(std::string path);
