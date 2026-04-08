@@ -12,27 +12,27 @@ It is written as an Arduino sketch, thus it requires **Arduino IDE** to upload o
 
 ### Edge Device(referred to as '*master*' in code and project's file names)   
 A Linux board with GPIOs and the Internet connection.   
-Runs two proccesses:   
+Runs two processes:   
 -   ***SCADA***.   
 -   ***WEB***.
    
 Those are connected via Unix Stream Socket for sensor data exchange and configuration of environmental control logic parameters.
    
 #### SCADA
-The proccess written in C++ that handles Master-Sensors communication and the environmental control logic.   
+The process written in C++ that handles Master-Sensors communication and the environmental control logic.   
 Main tasks:   
 -   Handles *Sensor* registration/initialization and receives data from them.
--   Sends last acquired data to the *Web proccess* on demand.
--   Keeps the environmental parameters accordingly to the configuration, received from the *Web proccess*.
+-   Sends last acquired data to the *Web process* on demand.
+-   Keeps the environmental parameters accordingly to the configuration, received from the *Web process*.
 
 #### WEB
-The proccess written in python with the usage of **Django** framework.   
+The process written in python with the usage of **Django** framework.   
 Main tasks:   
--   Receives data from *SCADA proccess* and saves it in the *Database*.
+-   Receives data from *SCADA process* and saves it in the *Database*.
 -   Handles *Web-App* logic.
--   Set configurations of environmental control logic in the *SCADA proccess* accordingly to the *Web-App* user input.
+-   Set configurations of environmental control logic in the *SCADA process* accordingly to the *Web-App* user input.
 
 ### Web Application (Web-App) and Database   
-*Web-App* and *Database* handling logic implemented in the *Web proccess* of the *Edge Device* using **Django** framework.   
-*Web-App* provides a user the access to the historical data stored in the *Database* and handles its visualisation. It also make possible for a user to configure the environmental parameters the *SCADA proccess* should keep.   
+*Web-App* and *Database* handling logic implemented in the *Web process* of the *Edge Device* using **Django** framework.   
+*Web-App* provides a user the access to the historical data stored in the *Database* and handles its visualisation. It also makes possible for a user to configure the environmental parameters the *SCADA process* should keep.   
 *Database* stores historical data in separate tables for each sensor and in the general one.   
