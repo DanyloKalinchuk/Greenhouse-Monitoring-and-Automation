@@ -7,7 +7,7 @@
 
 ## Module Descriptions
 ### Sensor
-A device composed of board with *ATmega328P* microcontroller, *nRf24L01* radio module and the set of *environment monitoring sensors*. It binds to an available *Edge Device* and sends sensor data each n-ms period.   
+A device composed of board with *ATmega328P* microcontroller, *nRF24L01* radio module and the set of *environment monitoring sensors*. It binds to an available *Edge Device* and sends sensor data each n-ms period.   
 It is written as an Arduino sketch, thus it requires **Arduino IDE** to upload on a chip. I use *Seeeduino Nano*, but it should work with any other board with *ATmega328P* microcontroller
 
 ### Edge Device(referred to as '*master*' in code and project's file names)   
