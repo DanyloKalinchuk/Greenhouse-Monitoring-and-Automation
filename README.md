@@ -14,7 +14,8 @@ It is written as an Arduino sketch, thus it requires **Arduino IDE** to upload o
 A Linux board with GPIOs and the Internet connection.   
 Runs two proccesses:   
 -   ***SCADA***.   
--   ***WEB***.   
+-   ***WEB***.
+   
 Those are connected via Unix Stream Socket for sensor data exchange and configuration of environmental control logic parameters.
    
 #### SCADA
