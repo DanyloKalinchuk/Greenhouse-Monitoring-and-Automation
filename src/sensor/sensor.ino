@@ -34,7 +34,6 @@ volatile uint8_t timer_flag;
 
 void setup() {
   if (!radio.begin()){
-    Serial.println("Failed");
     while (1);
   }
 
@@ -43,8 +42,6 @@ void setup() {
   radio.setRetries(10, 15);
 
   if (ms_ids.master == MASTER_DEFAULT){
-    Serial.println("Asking for data address...");
-
     radio.stopListening();
     radio.openWritingPipe(init_address);
     while (!radio.write(&ms_ids.sensor, sizeof(ms_ids.sensor)));
@@ -74,15 +71,9 @@ void loop() {
     dht_data = dht.read();
     uint32_t data_to_send[5];
 
-    Serial.print("\n\nHumidity: ");
-    Serial.println(dht_data.humidity);
-
-    Serial.print("Temperature: ");
-    Serial.println(dht_data.temperature);
-
     data_to_send[0] = (uint32_t)(ms_ids.sensor);
-    data_to_send[1] = (uint32_t)(dht_data.humidity * 100);
-    data_to_send[2] = (uint32_t)(dht_data.temperature * 100);
+    data_to_send[1] = (uint32_t)(dht_data.humidity);
+    data_to_send[2] = (uint32_t)(dht_data.temperature);
     data_to_send[3] = 0;
     data_to_send[4] = 0;
 
