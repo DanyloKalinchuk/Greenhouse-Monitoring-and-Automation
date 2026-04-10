@@ -12,7 +12,7 @@
 #include "../radio_logs/radio_logs.hpp"
 
 #define SAVE_PATH ("reg_sensors.bin")
-#define RADIO_LOGS_PATH("radio_logs.txt")
+#define RADIO_LOGS_PATH ("radio_logs.txt")
 
 #define DEFAULT_ID (0)
 #define MASTER_ID (1)

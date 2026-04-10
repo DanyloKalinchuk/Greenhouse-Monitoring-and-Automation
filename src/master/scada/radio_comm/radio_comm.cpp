@@ -100,8 +100,8 @@ void Radio::sensor_handle_data(uint32_t sensor_data[SENSOR_DATA_SIZE], SENS_FRAM
 
         sens_frame->humidity = sensor_data[1];
         sens_frame->temperature = sensor_data[2];
-        sens_frame->co2 = 0;
-        sens_frame->soil_moisture = 0;
+        sens_frame->co2 = sensor_data[3];
+        sens_frame->soil_moisture = sensor_data[4];
 }
 
 Radio::Radio(){
