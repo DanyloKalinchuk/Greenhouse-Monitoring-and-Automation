@@ -66,7 +66,7 @@ TEST_F(RadioCommFixture, SensorRegistration){
     EXPECT_EQ(sensors.at(sens2_id), sens2_expected_inner_id);
 }
 
-TEST_F(RadioCommFixture, DataHandling){
+TEST_F(RadioCommFixture, DataHandlingFromUnregisteredSensor){
     uint32_t sensor_data[SENSOR_DATA_SIZE];
     SENS_FRAME frame;
 
@@ -79,7 +79,27 @@ TEST_F(RadioCommFixture, DataHandling){
 
     radio.call_sensor_handle_data(sensor_data, &frame);
 
-    EXPECT_EQ(frame.sensor_id, sensor_data[0]);
+    EXPECT_EQ(frame.sensor_id, DEFAULT_ID);
+    EXPECT_EQ(frame.humidity, sensor_data[1]);
+    EXPECT_EQ(frame.temperature, sensor_data[2]);
+    EXPECT_EQ(frame.co2, sensor_data[3]);
+    EXPECT_EQ(frame.soil_moisture, sensor_data[4]);
+}
+
+TEST_F(RadioCommFixture, DataHandlingFromRegisteredSensor){
+    uint32_t sensor_data[SENSOR_DATA_SIZE];
+    SENS_FRAME frame;
+
+    sensor_data[0] = 25;
+    sensor_data[1] = 30;
+    sensor_data[2] = 31;
+    sensor_data[3] = 32;
+    sensor_data[4] = 33;
+
+    radio.call_sensor_init(sensor_data[0]);
+    radio.call_sensor_handle_data(sensor_data, &frame);
+
+    EXPECT_EQ(frame.sensor_id, DEFAULT_ID);
     EXPECT_EQ(frame.humidity, sensor_data[1]);
     EXPECT_EQ(frame.temperature, sensor_data[2]);
     EXPECT_EQ(frame.co2, sensor_data[3]);
