@@ -4,7 +4,7 @@ void Radio::read_data_on_disk(){
     std::fstream saved_sensors(SAVE_PATH, std::ios::in | std::ios::binary);
     if (!saved_sensors.is_open() || saved_sensors.peek() == EOF){
         this->radio_logs.log_out(MASTER_ID, MasterFileWarning);
-        return
+        return;
     }
 
     this->reg_sensors = {};
