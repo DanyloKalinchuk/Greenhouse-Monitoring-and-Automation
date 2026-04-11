@@ -101,16 +101,16 @@ TEST_F(RadioCommFixture, ReadUpdateSaves){
 
     ids_read = radio.get_sensors();
 
-    ASSERT_NE(ids_read.at(8), NULL);
-    ASSERT_NE(ids_init.at(8), NULL);
-    EXPECT_EQ(ids_read.at(8), ids_init.at(8))
+    ASSERT_NO_THROW(ids_read.at(8));
+    ASSERT_NO_THROW(ids_init.at(8));
+    EXPECT_EQ(ids_read.at(8), ids_init.at(8));
 
-    ASSERT_NE(ids_read.at(16), NULL);
-    ASSERT_NE(ids_init.at(16), NULL);
-    EXPECT_EQ(ids_read.at(16), ids_init.at(16))
+    ASSERT_NO_THROW(ids_read.at(16));
+    ASSERT_NO_THROW(ids_init.at(16));
+    EXPECT_EQ(ids_read.at(16), ids_init.at(16));
 
-    ASSERT_NE(ids_read.at(32), NULL);
-    ASSERT_NE(ids_init.at(32), NULL);
-    EXPECT_EQ(ids_read.at(32), ids_init.at(32))
+    ASSERT_NO_THROW(ids_read.at(32));
+    ASSERT_NO_THROW(ids_init.at(32));
+    EXPECT_EQ(ids_read.at(32), ids_init.at(32));
 }
 

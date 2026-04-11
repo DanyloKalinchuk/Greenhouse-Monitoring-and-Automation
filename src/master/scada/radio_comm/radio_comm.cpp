@@ -12,6 +12,7 @@ void Radio::read_data_on_disk(){
         return;
     }
 
+    this->reg_sensors = {};
     saved_sensors.read(reinterpret_cast<char *>(&this->next_sens_id), sizeof(this->next_sens_id));
     if (saved_sensors.fail()){
         this->radio_logs.log_out(MASTER_ID, MasterFail);
