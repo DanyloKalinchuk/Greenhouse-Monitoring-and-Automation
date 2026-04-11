@@ -12,6 +12,7 @@
 enum MsgType{
     MasterStart,
     MasterFail,
+    MasterFileWarning,
     SensorRegistered,
     SensorInit,
     SensorRead

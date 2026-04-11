@@ -28,6 +28,9 @@ void RadioLogs::log_out(uint8_t initiator_id, MsgType msg_type){
         case MasterFail:
             log_msg += "MasterFail\n";
             break;
+        case MasterFileWarning:
+            log_msg += "MasterFileWarning\n"
+            break;
         case SensorRegistered:
             log_msg += "SensorRegistered\n";
             break;
@@ -39,5 +42,5 @@ void RadioLogs::log_out(uint8_t initiator_id, MsgType msg_type){
             break;
     }
 
-    this->log_file << log_msg;
+    this->log_file << log_msg << '\n';
 }
