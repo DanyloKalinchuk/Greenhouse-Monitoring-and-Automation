@@ -2,7 +2,6 @@
 #define RADIO_COMM
 
 #include <RF24/RF24.h>
-#include <linux/printk.h>
 #include <iostream>
 #include <fstream>
 #include <cstdint>

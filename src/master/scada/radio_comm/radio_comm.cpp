@@ -113,7 +113,6 @@ Radio::Radio(){
         this->radio_logs.log_out(MASTER_ID, MasterFail);
         throw std::runtime_error("Failed to initialize the radio module");
     }
-    pr_info("Radio module initialized");
 
     this->read_data_on_disk();
 
