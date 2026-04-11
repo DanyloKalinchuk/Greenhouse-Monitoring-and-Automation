@@ -3,7 +3,12 @@
 
 class RadioCommTest : public Radio{
     public:
-    RadioCommTest() : Radio((uint8_t)(1)) {}
+    RadioCommTest() : Radio((uint8_t)(1)) {
+        this->reg_sensors = {};
+        this->next_sens_id = 1;
+
+        this->update_data_on_disk();
+    }
 
     std::map<uint8_t, uint8_t> get_sensors(){
         return this->reg_sensors;
