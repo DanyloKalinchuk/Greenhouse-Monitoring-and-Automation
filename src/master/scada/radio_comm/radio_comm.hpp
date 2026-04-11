@@ -8,7 +8,7 @@
 #include <map>
 #include <stdexcept>
 
-#include "../radio_logs/radio_logs.hpp"
+#include "radio_logs/radio_logs.hpp"
 
 #define SAVE_PATH ("reg_sensors.bin")
 #define RADIO_LOGS_PATH ("radio_logs.txt")
