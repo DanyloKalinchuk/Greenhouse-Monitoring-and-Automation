@@ -99,7 +99,7 @@ TEST_F(RadioCommFixture, DataHandlingFromRegisteredSensor){
     radio.call_sensor_init(sensor_data[0]);
     radio.call_sensor_handle_data(sensor_data, &frame);
 
-    EXPECT_EQ(frame.sensor_id, DEFAULT_ID);
+    EXPECT_EQ(frame.sensor_id, radio.get_sensors().at(sensor_data[0]));
     EXPECT_EQ(frame.humidity, sensor_data[1]);
     EXPECT_EQ(frame.temperature, sensor_data[2]);
     EXPECT_EQ(frame.co2, sensor_data[3]);
