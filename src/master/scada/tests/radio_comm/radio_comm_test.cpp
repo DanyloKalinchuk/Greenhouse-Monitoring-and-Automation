@@ -1,6 +1,3 @@
-#define SAVE_PATH ("test_sensors.bin")
-#define RADIO_LOGS_PATH ("test_logs.txt")
-
 #include <gtest/gtest.h>
 #include "../../radio_comm/radio_comm.hpp"
 
