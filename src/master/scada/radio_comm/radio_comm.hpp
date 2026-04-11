@@ -35,7 +35,7 @@ class Radio{
     RF24 radio;
     RadioLogs radio_logs = RadioLogs(RADIO_LOGS_PATH);
 
-    private:
+    protected:
     std::map<uint8_t, uint8_t> reg_sensors;
     uint8_t next_sens_id = 1;
 
