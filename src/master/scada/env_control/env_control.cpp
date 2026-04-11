@@ -21,6 +21,10 @@ void EnvControl::handle_comm(){
     }
 }
 
+void EnvControl::change_parameter(EnvParams env_param, bool increase){
+    
+}
+
 void EnvControl::check_params(SENS_FRAME frame){
     if (frame.temperature > (this->temp_perf + this->temp_error)){
         this->change_parameter(ENV_TEMPERATURE, false);

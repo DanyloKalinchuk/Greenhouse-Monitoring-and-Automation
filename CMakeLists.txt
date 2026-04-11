@@ -17,7 +17,8 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
-file(GLOB_RECURSE SCADA_TEST_SRC CONFIGURE_DEPENDS "src/master/scada/tests/*.cpp")
+file(GLOB_RECURSE SCADA_TEST_SRC CONFIGURE_DEPENDS "src/master/scada/*.cpp")
+list(FILTER SCADA_TEST_SRC EXCLUDE REGEX ".*/scada.cpp*")
 
 enable_testing()
 add_executable(scada_tests ${SCADA_TEST_SRC})
