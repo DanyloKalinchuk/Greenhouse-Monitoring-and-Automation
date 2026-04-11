@@ -29,7 +29,7 @@ void RadioLogs::log_out(uint8_t initiator_id, MsgType msg_type){
             log_msg += "MasterFail\n";
             break;
         case MasterFileWarning:
-            log_msg += "MasterFileWarning\n"
+            log_msg += "MasterFileWarning\n";
             break;
         case SensorRegistered:
             log_msg += "SensorRegistered\n";
