@@ -7,7 +7,7 @@ void Radio::read_data_on_disk(){
         throw std::runtime_error((std::string)("Failed to open the save file: ") + (std::string)SAVE_PATH);
     }
 
-    if (saved_sensors.peek() == std::fstream::eof()){
+    if (saved_sensors.peek() == EOF){
         saved_sensors.close();
         return;
     }
@@ -52,8 +52,8 @@ void Radio::update_data_on_disk(){
     }
 
     for (const auto [key, id] : this->reg_sensors){
-        saved_sensors.write(reinterpret_cast<char *>(&key), sizeof(key));
-        saved_sensors.write(reinterpret_cast<char *>(&id), sizeof(id));
+        saved_sensors.write(reinterpret_cast<const char *>(&key), sizeof(key));
+        saved_sensors.write(reinterpret_cast<const char *>(&id), sizeof(id));
 
         if (saved_sensors.fail()){
             this->radio_logs.log_out(MASTER_ID, MasterFail);
@@ -121,8 +121,8 @@ Radio::Radio(){
     this->radio.setRetries(10, 15);
 
     this->radio.startListening();
-    this->radio.openReadPipe(INIT_PIPE, (uint8_t*)(INIT_ADDRESS));
-    this->radio.openReadPipe(DATA_PIPE, (uint64_t)(MASTER_ID));
+    this->radio.openReadingPipe(INIT_PIPE, (uint8_t*)(INIT_ADDRESS));
+    this->radio.openReadingPipe(DATA_PIPE, (uint64_t)(MASTER_ID));
 }
 
 Radio::Radio(uint8_t dummy){
@@ -148,6 +148,7 @@ SENS_FRAME Radio::handle_communications(){
         this->sensor_init(sensor_id);
 
         this->radio.stopListening();
+        this->radio.openWritingPipe((uint64_t)(sensor_id));
         for (int i = 0; i < 50; i++){
             if (this->radio.write(&master_id, sizeof(master_id))){
                 break;
@@ -155,8 +156,8 @@ SENS_FRAME Radio::handle_communications(){
         }
 
         this->radio.startListening();
-        this->radio.openReadPipe(INIT_PIPE, (uint8_t*)(INIT_ADDRESS));
-        this->radio.openReadPipe(DATA_PIPE, (uint64_t)(MASTER_ID));
+        this->radio.openReadingPipe(INIT_PIPE, (uint8_t*)(INIT_ADDRESS));
+        this->radio.openReadingPipe(DATA_PIPE, (uint64_t)(MASTER_ID));
 
         sens_frame.sensor_id = DEFAULT_ID;
 

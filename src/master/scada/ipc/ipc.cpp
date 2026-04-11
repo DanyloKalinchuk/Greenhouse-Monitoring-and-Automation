@@ -13,7 +13,7 @@ IPC::IPC(){
     }
 
     if (remove(SOCKET_PATH) == -1 && errno != ENOENT){
-        throw std::runtime_error("Unnable to remove " + SOCKET_PATH);
+        throw std::runtime_error(std::string("Unnable to remove ") + SOCKET_PATH);
     }
 
     memset(&this->addr, 0, sizeof(struct sockaddr_un));
@@ -36,7 +36,7 @@ IPC::IPC(){
     }
 
     this->ipc_on.store(true);
-    this->ipc_thread = std::thread(this->ipc_handling, this);
+    this->ipc_thread = std::thread(&IPC::ipc_handling, this);
 }
 
 IPC::~IPC(){
