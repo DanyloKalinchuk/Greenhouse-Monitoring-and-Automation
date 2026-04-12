@@ -14,7 +14,7 @@
 #define TEMP_ACT_LINE 1
 #define HUM_ACT_LINE 2
 #define MOIST_ACT_LINE 3
-#define CO@_ACT_LINE 4
+#define CO2_ACT_LINE 4
 
 enum EnvParams{
     ENV_TEMPERATURE,
@@ -24,13 +24,14 @@ enum EnvParams{
 };
 
 class EnvControl{
-    Radio radio = Radio();
+    Radio radio;
     std::map<uint8_t, std::pair<SENS_FRAME, uint64_t>> last_records;
 
     std::thread comm_thread;
-    std::atomic<bool> comm_on;
 
     protected:
+    std::atomic<bool> comm_on;
+
     std::unique_ptr<Actuator> temp_act;
     std::unique_ptr<Actuator> hum_act;
     std::unique_ptr<Actuator> moist_act;

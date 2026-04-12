@@ -14,6 +14,8 @@ class Actuator {
     const bool line_initialized;
 
     uint8_t pin;
+
+    protected:
     int16_t perf;
     uint8_t error;
 

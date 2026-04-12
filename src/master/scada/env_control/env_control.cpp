@@ -22,6 +22,8 @@ void EnvControl::change_parameter(SENS_FRAME frame){
 EnvControl::EnvControl(std::unique_ptr<Actuator> temp_act, std::unique_ptr<Actuator> hum_act, 
     std::unique_ptr<Actuator> moist_act, std::unique_ptr<Actuator> co2_act)
 {
+    this->radio = Radio();
+
     this->temp_act = std::move(temp_act);
     this->hum_act = std::move(hum_act);
     this->moist_act = std::move(moist_act);
