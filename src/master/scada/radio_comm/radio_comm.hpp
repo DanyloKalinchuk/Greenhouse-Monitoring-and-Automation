@@ -15,7 +15,7 @@
 #endif
 
 #ifndef RADIO_LOGS_PATH
-#define RADIO_LOGS_PATH ("radio_logs.txt")
+#define RADIO_LOGS_PATH ("radio_logs.log")
 #endif
 
 #define DEFAULT_ID (0)

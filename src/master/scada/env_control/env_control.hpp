@@ -24,24 +24,24 @@ enum EnvParams{
 };
 
 class EnvControl{
-    std::thread comm_thread;
-    std::atomic<bool> comm_on;
-
     Radio radio = Radio();
     std::map<uint8_t, std::pair<SENS_FRAME, uint64_t>> last_records;
 
+    std::thread comm_thread;
+    std::atomic<bool> comm_on;
+
+    protected:
     std::unique_ptr<Actuator> temp_act;
     std::unique_ptr<Actuator> hum_act;
     std::unique_ptr<Actuator> moist_act;
     std::unique_ptr<Actuator> co2_act;
 
-    void handle_comm();
-
-    protected:
     void change_parameter(SENS_FRAME frame);
+    virtual void handle_comm();
 
     public:
-    EnvControl();
+    EnvControl(std::unique_ptr<Actuator> temp_act, std::unique_ptr<Actuator> hum_act, 
+        std::unique_ptr<Actuator> moist_act, std::unique_ptr<Actuator> co2_act);
     ~EnvControl();
 
     /*

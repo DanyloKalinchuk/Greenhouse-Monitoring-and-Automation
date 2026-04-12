@@ -1,10 +1,10 @@
 #include "actuator.hpp"
 
-void Actuator::handle_changes(itn16_t param_value){
+void Actuator::handle_changes(int16_t param_value){
     
 }
 
-Actuator::Actuator(uint8_t pin, int16_t init_perf, uint8_t init_error){
+Actuator::Actuator(uint8_t pin, int16_t init_perf, uint8_t init_error) : line_initialized(true){
     this->pin = pin;
     this->perf = init_perf;
     this->error = init_error;
@@ -46,7 +46,7 @@ Actuator::Actuator(uint8_t pin, int16_t init_perf, uint8_t init_error){
 		throw std::runtime_error("Failed to create request_config");
 	}
 
-    gpiod_request_config_set_consumer(request_conf, std::String("actuator_pin_") + std::to_string(this->pin));
+    gpiod_request_config_set_consumer(request_conf, (std::string("actuator_pin_") + std::to_string(this->pin)).c_str());
 
 	this->request = gpiod_chip_request_lines(this->chip, request_conf, config);
 	gpiod_request_config_free(request_conf);
@@ -58,9 +58,16 @@ Actuator::Actuator(uint8_t pin, int16_t init_perf, uint8_t init_error){
 	}
 }
 
+Actuator::Actuator(int16_t init_perf, uint8_t init_error) : line_initialized(false){
+	this->perf = init_perf;
+	this->error = init_error;
+}
+
 Actuator::~Actuator(){
-    gpiod_line_request_release(this->request);
-	gpiod_chip_close(this->chip);
+    if (this->line_initialized){
+		gpiod_line_request_release(this->request);
+		gpiod_chip_close(this->chip);
+	}
 }
 
 void Actuator::set_target(int16_t perf, uint8_t error){

@@ -24,7 +24,7 @@ enable_testing()
 add_executable(scada_tests ${SCADA_TEST_SRC})
 target_compile_definitions(scada_tests PRIVATE 
   SAVE_PATH="test_sensors.bin"
-  RADIO_LOGS_PATH="test_logs.txt"
+  RADIO_LOGS_PATH="test_logs.log"
 )
 target_link_libraries(scada_tests gtest rf24 pthread)
 add_test(NAME ScadaTests COMMAND scada_tests)

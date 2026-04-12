@@ -20,7 +20,7 @@ class Actuator {
     Actuator(uint8_t pin, int16_t init_perf, uint8_t init_error);
     ~Actuator();
 
-    virtual void handle_changes(itn16_t param_value);
+    virtual void handle_changes(int16_t param_value);
     void set_target(int16_t perf, uint8_t error);
 };
 
