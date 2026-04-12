@@ -6,7 +6,7 @@ file(GLOB_RECURSE SCADA_SRC CONFIGURE_DEPENDS "src/master/scada/*.cpp")
 list(FILTER SCADA_SRC EXCLUDE REGEX ".*/tests/.*")
 
 add_executable(scada_process ${SCADA_SRC})
-target_link_libraries(scada_process rf24 pthread)
+target_link_libraries(scada_process rf24 pthread gpiod)
 
 include(FetchContent)
 FetchContent_Declare(
@@ -26,5 +26,5 @@ target_compile_definitions(scada_tests PRIVATE
   SAVE_PATH="test_sensors.bin"
   RADIO_LOGS_PATH="test_logs.log"
 )
-target_link_libraries(scada_tests gtest rf24 pthread)
+target_link_libraries(scada_tests gtest rf24 pthread gpiod)
 add_test(NAME ScadaTests COMMAND scada_tests)
