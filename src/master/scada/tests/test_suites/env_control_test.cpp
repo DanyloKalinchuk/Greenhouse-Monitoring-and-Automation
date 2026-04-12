@@ -43,7 +43,7 @@ class ActuatorTest : public Actuator{
     }
 
     int16_t get_curr_value(){
-        std::lock_guard<mutex> lock_act(this->act_mtx);
+        std::lock_guard<std::mutex> lock_act(this->act_mtx);
         return this->curr_value;
     }
 };
