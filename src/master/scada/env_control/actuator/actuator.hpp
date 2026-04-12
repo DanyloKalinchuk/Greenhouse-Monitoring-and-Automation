@@ -11,6 +11,7 @@
 class Actuator {
     struct gpiod_chip *chip;
 	struct gpiod_line_request *request;
+    const bool line_initialized;
 
     uint8_t pin;
     int16_t perf;
@@ -18,6 +19,7 @@ class Actuator {
 
     public:
     Actuator(uint8_t pin, int16_t init_perf, uint8_t init_error);
+    Actuator(int16_t init_perf, uint8_t init_error);
     ~Actuator();
 
     virtual void handle_changes(int16_t param_value);
