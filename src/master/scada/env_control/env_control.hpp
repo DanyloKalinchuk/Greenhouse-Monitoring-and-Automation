@@ -24,7 +24,7 @@ enum EnvParams{
 };
 
 class EnvControl{
-    Radio radio;
+    Radio radio = Radio();
     std::map<uint8_t, std::pair<SENS_FRAME, uint64_t>> last_records;
 
     std::thread comm_thread;
