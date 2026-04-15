@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <thread>
 #include <atomic>
+#include <mutex>
 #include <map>
 #include <utility>
 #include <memory>
@@ -28,6 +29,7 @@ class EnvControl{
     std::map<uint8_t, std::pair<SENS_FRAME, uint64_t>> last_records;
 
     std::thread comm_thread;
+    std::mutex last_rec_mtx;
 
     protected:
     std::atomic<bool> comm_on;
