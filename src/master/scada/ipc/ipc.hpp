@@ -30,10 +30,10 @@ class IPC{
     int sfd, cfd;
     struct sockaddr_un addr;
 
+    protected:
     void ipc_write(uint16_t* msg);
     uint16_t ipc_read();
 
-    protected:
     void ipc_handling();
     virtual void handle_configuration(std::vector<uint16_t> params);
     virtual void handle_data_request();

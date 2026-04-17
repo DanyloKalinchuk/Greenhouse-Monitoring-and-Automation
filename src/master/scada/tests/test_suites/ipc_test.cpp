@@ -8,7 +8,7 @@ class IPCTest : public IPC {
     int test_sfd;
     struct sockaddr_un test_addr;
 
-    std::vector<uint16_t> test_params(CONF_BUFF_SIZE);
+    std::vector<uint16_t> test_params = {};
     std::vector<SENS_FRAME> test_last_records;
 
     void test_write(uint16_t* msg){
@@ -28,8 +28,10 @@ class IPCTest : public IPC {
 
     void handle_configuration(std::vector<uint16_t> params) override{
         std::lock_guard<std::mutex> test_lock(this->test_mtx);
-        for (int i = 0; i < CONF_BUFF_SIZE; i++){
-            this->test_params[i] = params[i];
+
+        this->test_params = {};
+        for (const uint16_t& param : params){
+            this->test_params.push_back(param);
         }
 
         this->test_conf_ready.store(true);
@@ -58,7 +60,7 @@ class IPCTest : public IPC {
     public:
     IPCTest() : IPC() {
         this->test_sfd = socket(AF_UNIX, SOCK_STREAM, 0);
-        if (sfd == -1){
+        if (this->test_sfd == -1){
             throw std::runtime_error("Failed to open test_sfd");
         }
 
@@ -66,7 +68,7 @@ class IPCTest : public IPC {
         this->test_addr.sun_family = AF_UNIX;
         strcpy(this->test_addr.sun_path, SOCKET_PATH);
 
-        if (connect(sfd, (struct sockaddr *) &this->test_addr, sizeof(struct sockaddr_un)) == -1){
+        if (connect(this->test_sfd, (struct sockaddr *) &this->test_addr, sizeof(struct sockaddr_un)) == -1){
             throw std::runtime_error("Failed to connect TEST");
         }
     }
@@ -76,7 +78,7 @@ class IPCTest : public IPC {
     }
 
     std::vector<SENS_FRAME> test_make_request(){
-        uint32_t msg = MSG_REQ;
+        uint16_t msg = MSG_REQ;
         std::vector<SENS_FRAME> received_data;
 
         this->test_write(&msg);
@@ -98,7 +100,7 @@ class IPCTest : public IPC {
     }
 
     bool test_configure(std::vector<uint16_t> params){
-        uint32_t msg = MSG_CONF;
+        uint6_t msg = MSG_CONF;
 
         this->test_write(&msg);
 
