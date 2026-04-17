@@ -22,9 +22,6 @@
 #define SOCKET_PATH ("/tmp/SCADA_SOCK")
 
 class IPC{
-    std::thread ipc_thread;
-    std::atomic<bool> ipc_on;
-    
     EnvControl env_control = EnvControl(
         std::make_unique<Actuator>(10, 10),
         std::make_unique<Actuator>(10, 10),
@@ -35,16 +32,20 @@ class IPC{
     int sfd, cfd;
     struct sockaddr_un addr;
 
-    protected:
     void ipc_write(uint16_t* msg);
     uint16_t ipc_read();
 
-    void ipc_handling();
+    protected:
+    std::thread ipc_thread;
+    std::atomic<bool> ipc_on;
+    
+    virtual void ipc_handling();
     virtual void handle_configuration(std::vector<uint16_t> params);
     virtual void handle_data_request();
 
     public:
     IPC();
+    IPC(uint8_t dummy);
     ~IPC();
 
 };

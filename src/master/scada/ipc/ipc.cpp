@@ -1,13 +1,6 @@
 #include "ipc.hpp"
 
 void IPC::ipc_handling(){
-    this->cfd = accept(this->sfd, NULL, NULL);
-    if (this->cfd == -1){
-        close(this->sfd);
-        close(this->cfd);
-        throw std::runtime_error("Failed to accept");
-    }
-
     while (this->ipc_on.load()){
         std::vector<uint16_t> buff;
         uint16_t msg = this->ipc_read();
@@ -88,8 +81,19 @@ IPC::IPC(){
         throw std::runtime_error("Failed to listen");
     }
 
+    this->cfd = accept(this->sfd, NULL, NULL);
+    if (this->cfd == -1){
+        close(this->sfd);
+        close(this->cfd);
+        throw std::runtime_error("Failed to accept");
+    }
+
     this->ipc_on.store(true);
     this->ipc_thread = std::thread(&IPC::ipc_handling, this);
+}
+
+IPC::IPC(uint8_t dummy){
+    this->sfd = -1;
 }
 
 IPC::~IPC(){
@@ -98,6 +102,8 @@ IPC::~IPC(){
         this->ipc_thread.join();
     }
 
-    close(this->sfd);
-    close(this->cfd);
+    if (this->sfd != -1){
+        close(this->sfd);
+        close(this->cfd);
+    }
 }

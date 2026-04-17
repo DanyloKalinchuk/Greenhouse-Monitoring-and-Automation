@@ -1,30 +1,47 @@
 #include <gtest/gtest.h>
 #include "../../ipc/ipc.hpp"
 
+#define MSG_DEF (0)
+
 class IPCTest : public IPC {
     std::mutex test_mtx;
     std::atomic<bool> test_conf_ready = false;
 
-    int test_sfd;
-    struct sockaddr_un test_addr;
+    std::atomic<uint16_t> buff = MSG_DEF;
+    std::atomic<bool> buff_ready_to_write = true;
 
-    std::vector<uint16_t> test_params = {};
+    std::vector<uint16_t> test_params;
     std::vector<SENS_FRAME> test_last_records;
 
-    void test_write(uint16_t* msg){
-        if (write(this->test_sfd, msg, sizeof(*msg)) < sizeof(*msg)){
-            throw std::runtime_error("Failed to SEND IPC TEST message");
-        }
-    }
-
     uint16_t test_read(){
-        uint16_t msg;
-        if (read(this->test_sfd, &msg, sizeof(msg)) < sizeof(msg)){
-            throw std::runtime_error("Failed to READ IPC TEST message");
-        }
-
-        return msg;
+        while (this->buff_ready_to_write.load());
+        this->buff_ready_to_write.store(true);
+        return this->buff.load();
     }
+
+    void test_write(uint16_t msg){
+        while (!this->buff_ready_to_write.load());
+        this->buff.store(msg);
+        this->buff_ready_to_write.store(false);
+    }
+
+    void ipc_handling() override {
+        while (this->ipc_on.load()){
+            std::vector<uint16_t> buff;
+            uint16_t msg = this->test_read();
+
+            if (msg == MSG_CONF){
+                for (int i = 0; i < 8; i++){
+                    buff.push_back(this->test_read());
+                }
+
+                this->handle_configuration(buff);
+            }else if (msg == MSG_REQ){
+                this->handle_data_request();
+            }
+        }
+    }
+
 
     void handle_configuration(std::vector<uint16_t> params) override{
         std::lock_guard<std::mutex> test_lock(this->test_mtx);
@@ -40,37 +57,27 @@ class IPCTest : public IPC {
     void handle_data_request() override{
         std::lock_guard<std::mutex> test_lock(this->test_mtx);
         uint16_t msg = this->test_last_records.size();
-        this->ipc_write(&msg);
+        this->test_write(msg);
 
         for (SENS_FRAME& frame : this->test_last_records){
             msg = frame.sensor_id;
-            this->ipc_write(&msg);
+            this->test_write(msg);
 
             msg = frame.temperature;
-            this->ipc_write(&msg);
+            this->test_write(msg);
             msg = frame.humidity;
-            this->ipc_write(&msg);
+            this->test_write(msg);
             msg = frame.soil_moisture;
-            this->ipc_write(&msg);
+            this->test_write(msg);
             msg = frame.co2;
-            this->ipc_write(&msg);
+            this->test_write(msg);
         }
     }
 
     public:
-    IPCTest() : IPC() {
-        this->test_sfd = socket(AF_UNIX, SOCK_STREAM, 0);
-        if (this->test_sfd == -1){
-            throw std::runtime_error("Failed to open test_sfd");
-        }
-
-        memset(&this->test_addr, 0, sizeof(struct sockaddr_un));
-        this->test_addr.sun_family = AF_UNIX;
-        strcpy(this->test_addr.sun_path, SOCKET_PATH);
-
-        if (connect(this->test_sfd, (struct sockaddr *) &this->test_addr, sizeof(struct sockaddr_un)) == -1){
-            throw std::runtime_error("Failed to connect TEST");
-        }
+    IPCTest() : IPC(0) {
+        this->ipc_on.store(true);
+        this->ipc_thread = std::thread(&IPC::ipc_handling, this);
     }
 
     void set_last_records(std::vector<SENS_FRAME> last_records){
@@ -81,7 +88,7 @@ class IPCTest : public IPC {
         uint16_t msg = MSG_REQ;
         std::vector<SENS_FRAME> received_data;
 
-        this->test_write(&msg);
+        this->test_write(msg);
 
         uint16_t frame_num = this->test_read();
         for (int i = 0; i < frame_num; i++){
@@ -102,11 +109,11 @@ class IPCTest : public IPC {
     bool test_configure(std::vector<uint16_t> params){
         uint16_t msg = MSG_CONF;
 
-        this->test_write(&msg);
+        this->test_write(msg);
 
         for (const uint16_t& param : params){
             msg = param;
-            this->test_write(&msg);
+            this->test_write(msg);
         }
 
         while (!this->test_conf_ready.load());
