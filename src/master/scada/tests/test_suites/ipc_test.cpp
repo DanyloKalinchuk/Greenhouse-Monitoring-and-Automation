@@ -17,7 +17,7 @@ class IPCTest : public IPC {
 
     uint16_t test_read(){
         std::unique_lock<std::mutex> rw_lock(this->test_rw_mtx);
-        this->test_rw_cv.wait(rw_lock, [this]{return this->ready_to_read});
+        this->test_rw_cv.wait(rw_lock, [this]{return this->ready_to_read;});
 
         uint16_t msg = this->buff;
 
@@ -29,7 +29,7 @@ class IPCTest : public IPC {
 
     void test_write(uint16_t msg){
         std::unique_lock<std::mutex> rw_lock(this->test_rw_mtx);
-        this->test_rw_cv.wait(rw_lock, [this]{return !this->ready_to_read});
+        this->test_rw_cv.wait(rw_lock, [this]{return !this->ready_to_read;});
 
         this->buff = msg;
 
