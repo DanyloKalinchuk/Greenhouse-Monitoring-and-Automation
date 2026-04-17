@@ -4,25 +4,37 @@
 #define MSG_DEF (0)
 
 class IPCTest : public IPC {
-    std::mutex test_mtx;
+    std::mutex test_data_mtx;
     std::atomic<bool> test_conf_ready = false;
 
-    std::atomic<uint16_t> buff = MSG_DEF;
-    std::atomic<bool> buff_ready_to_write = true;
+    std::mutex test_rw_mtx;
+    std::condition_variable test_rw_cv;
+    bool ready_to_read = false;
+    uint16_t buff;
 
     std::vector<uint16_t> test_params;
     std::vector<SENS_FRAME> test_last_records;
 
     uint16_t test_read(){
-        while (this->buff_ready_to_write.load());
-        this->buff_ready_to_write.store(true);
-        return this->buff.load();
+        std::unique_lock<std::mutex> rw_lock(this->test_rw_mtx);
+        this->test_rw_cv.wait(rw_lock, [this]{return this->ready_to_read});
+
+        uint16_t msg = this->buff;
+
+        this->ready_to_read = false;
+        this->test_rw_cv.notify_one();
+        
+        return msg;
     }
 
     void test_write(uint16_t msg){
-        while (!this->buff_ready_to_write.load());
-        this->buff.store(msg);
-        this->buff_ready_to_write.store(false);
+        std::unique_lock<std::mutex> rw_lock(this->test_rw_mtx);
+        this->test_rw_cv.wait(rw_lock, [this]{return !this->ready_to_read});
+
+        this->buff = msg;
+
+        this->ready_to_read = true;
+        this->test_rw_cv.notify_one();
     }
 
     void ipc_handling() override {
@@ -44,7 +56,7 @@ class IPCTest : public IPC {
 
 
     void handle_configuration(std::vector<uint16_t> params) override{
-        std::lock_guard<std::mutex> test_lock(this->test_mtx);
+        std::lock_guard<std::mutex> test_lock(this->test_data_mtx);
 
         this->test_params = {};
         for (const uint16_t& param : params){
@@ -55,7 +67,7 @@ class IPCTest : public IPC {
     }
 
     void handle_data_request() override{
-        std::lock_guard<std::mutex> test_lock(this->test_mtx);
+        std::lock_guard<std::mutex> test_lock(this->test_data_mtx);
         uint16_t msg = this->test_last_records.size();
         this->test_write(msg);
 
@@ -81,6 +93,7 @@ class IPCTest : public IPC {
     }
 
     void set_last_records(std::vector<SENS_FRAME> last_records){
+        std::lock_guard<std::mutex> test_lock(this->test_data_mtx);
         this->test_last_records = last_records;
     }
 
@@ -117,7 +130,7 @@ class IPCTest : public IPC {
         }
 
         while (!this->test_conf_ready.load());
-        std::lock_guard<std::mutex> test_lock(this->test_mtx);
+        std::lock_guard<std::mutex> test_lock(this->test_data_mtx);
         for (int i = 0; i < CONF_BUFF_SIZE; i++){
             if (this->test_params[i] != params[i]){
                 return false;
