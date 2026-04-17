@@ -77,7 +77,7 @@ class IPCTest : public IPC {
     public:
     IPCTest() : IPC(0) {
         this->ipc_on.store(true);
-        this->ipc_thread = std::thread(&IPC::ipc_handling, this);
+        this->ipc_thread = std::thread(&IPCTest::ipc_handling, this);
     }
 
     void set_last_records(std::vector<SENS_FRAME> last_records){
