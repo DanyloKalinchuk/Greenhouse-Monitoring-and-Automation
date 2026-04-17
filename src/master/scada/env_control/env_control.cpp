@@ -7,7 +7,7 @@ void EnvControl::handle_comm(){
         if (frame.sensor_id != DEFAULT_ID){
             std::chrono::time_point now = std::chrono::system_clock::now();
             std::lock_guard<std::mutex> last_rec_lock(this->last_rec_mtx);
-            this->last_records[frame.sensor_id] = {frame, std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count()};
+            this->last_records[frame.sensor_id] = {frame, std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count()};
             this->change_parameter(frame);
         } 
     }
@@ -57,7 +57,17 @@ void EnvControl::set_param(EnvParams env_param, int16_t X_perf, uint8_t X_error)
     }
 }
 
-std::map<uint8_t, std::pair<SENS_FRAME, uint64_t>> EnvControl::get_last_records(){
+std::vector<SENS_FRAME> EnvControl::get_last_records(){
+    std::chrono::time_point now = std::chrono::system_clock::now();
+    uint64_t secs_now = std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count();
+    std::vector<SENS_FRAME> active_sens_data;
+
     std::lock_guard<std::mutex> last_rec_lock(this->last_rec_mtx);
-    return this->last_records;
+    for (const auto& [sens_id, frame_n_timestamp] : this->last_records){
+        if ((secs_now - frame_n_timestamp.second) <= ACTIVE_TIME_LIMIT_SEC){
+            active_sens_data.push_back(frame_n_timestamp.first);
+        }
+    }
+
+    return active_sens_data;
 }

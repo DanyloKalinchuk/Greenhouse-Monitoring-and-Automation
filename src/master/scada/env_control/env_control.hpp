@@ -9,8 +9,11 @@
 #include <atomic>
 #include <mutex>
 #include <map>
+#include <vector>
 #include <utility>
 #include <memory>
+
+#define ACTIVE_TIME_LIMIT_SEC 250
 
 #define TEMP_ACT_LINE 1
 #define HUM_ACT_LINE 2
@@ -53,7 +56,7 @@ class EnvControl{
         and lower limit of the parameter and the corresponding X_perf value.
     */
     void set_param(EnvParams env_param, int16_t X_perf, uint8_t X_error);
-    std::map<uint8_t, std::pair<SENS_FRAME, uint64_t>> get_last_records();
+    std::vector<SENS_FRAME> get_last_records();
 };
 
 #endif
