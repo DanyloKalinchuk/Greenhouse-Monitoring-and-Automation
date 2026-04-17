@@ -25,7 +25,12 @@ class IPC{
     std::thread ipc_thread;
     std::atomic<bool> ipc_on;
     
-    EnvControl env_control;
+    EnvControl env_control = EnvControl(
+        std::make_unique<Actuator>(10, 10),
+        std::make_unique<Actuator>(10, 10),
+        std::make_unique<Actuator>(10, 10),
+        std::make_unique<Actuator>(10, 10)
+    );
 
     int sfd, cfd;
     struct sockaddr_un addr;

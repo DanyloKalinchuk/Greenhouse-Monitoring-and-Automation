@@ -100,7 +100,7 @@ class IPCTest : public IPC {
     }
 
     bool test_configure(std::vector<uint16_t> params){
-        uint6_t msg = MSG_CONF;
+        uint16_t msg = MSG_CONF;
 
         this->test_write(&msg);
 
@@ -109,7 +109,7 @@ class IPCTest : public IPC {
             this->test_write(&msg);
         }
 
-        while (!this->test_conf_ready.load())
+        while (!this->test_conf_ready.load());
         std::lock_guard<std::mutex> test_lock(this->test_mtx);
         for (int i = 0; i < CONF_BUFF_SIZE; i++){
             if (this->test_params[i] != params[i]){

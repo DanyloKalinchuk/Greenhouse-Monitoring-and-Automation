@@ -1,6 +1,9 @@
-#include "env_control/env_control.hpp"
+#include "ipc/ipc.hpp"
 
 int main(){
+    IPC ipc = IPC();
+
+    while (1);
 
     return 0;
 }
