@@ -2,23 +2,12 @@
 
 void IPC::ipc_handling(){
     while (this->ipc_on.load()){
-        std::vector<uint16_t> buff;
-        uint16_t msg = this->ipc_read();
-
-        if (msg == MSG_CONF){
-            for (int i = 0; i < 8; i++){
-                buff.push_back(this->ipc_read());
-            }
-
-            this->handle_configuration(buff);
-        }else if (msg == MSG_REQ){
-            this->handle_data_request();
-        }
+        this->handle_msg();
     }
 }
 
-void IPC::ipc_write(uint16_t* msg){
-    if (write(this->cfd, msg, sizeof(*msg)) < sizeof(*msg)){
+void IPC::ipc_write(uint16_t msg){
+    if (write(this->cfd, &msg, sizeof(msg)) < sizeof(msg)){
         throw std::runtime_error("Failed to SEND IPC message");
     }
 }
@@ -32,6 +21,21 @@ uint16_t IPC::ipc_read(){
     return msg;
 }
 
+void IPC::handle_msg(){
+    std::vector<uint16_t> buff;
+    uint16_t msg = this->ipc_read();
+
+    if (msg == MSG_CONF){
+        for (int i = 0; i < 8; i++){
+            buff.push_back(this->ipc_read());
+        }
+
+        this->handle_configuration(buff);
+    }else if (msg == MSG_REQ){
+        this->handle_data_request();
+    }
+}
+
 void IPC::handle_configuration(std::vector<uint16_t> params){
     this->env_control.set_param(ENV_TEMPERATURE, params[0], params[1]);
     this->env_control.set_param(ENV_HUMIDITY, params[2], params[3]);
@@ -42,20 +46,20 @@ void IPC::handle_configuration(std::vector<uint16_t> params){
 void IPC::handle_data_request(){
     std::vector<SENS_FRAME> frames = this->env_control.get_last_records();
     uint16_t msg = frames.size();
-    this->ipc_write(&msg);
+    this->ipc_write(msg);
 
     for (SENS_FRAME& frame : frames){
         msg = frame.sensor_id;
-        this->ipc_write(&msg);
+        this->ipc_write(msg);
 
         msg = frame.temperature;
-        this->ipc_write(&msg);
+        this->ipc_write(msg);
         msg = frame.humidity;
-        this->ipc_write(&msg);
+        this->ipc_write(msg);
         msg = frame.soil_moisture;
-        this->ipc_write(&msg);
+        this->ipc_write(msg);
         msg = frame.co2;
-        this->ipc_write(&msg);
+        this->ipc_write(msg);
     }
 }
 
