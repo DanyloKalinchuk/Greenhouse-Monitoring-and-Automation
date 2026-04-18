@@ -63,7 +63,12 @@ void IPC::handle_data_request(){
     }
 }
 
-IPC::IPC(){
+IPC::IPC() : env_control(
+    std::make_unique<Actuator>(10, 10),
+    std::make_unique<Actuator>(10, 10),
+    std::make_unique<Actuator>(10, 10),
+    std::make_unique<Actuator>(10, 10)
+) {
     this->sfd = socket(AF_UNIX, SOCK_STREAM, 0);
     if (this->sfd == -1){
         throw std::runtime_error("Failed to open the socket");
@@ -96,7 +101,7 @@ IPC::IPC(){
     this->ipc_thread = std::thread(&IPC::ipc_handling, this);
 }
 
-IPC::IPC(uint8_t dummy){
+IPC::IPC(uint8_t dummy) : env_control() {
     this->sfd = -1;
 }
 

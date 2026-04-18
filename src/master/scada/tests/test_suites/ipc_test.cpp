@@ -44,6 +44,10 @@ class IPCTest : public IPC {
 
         return frames;
     }
+
+    void set_last_records(std::vector<SENS_FRAME> frames){
+        this->env_control.set_last_records(frames);
+    }
 };
 
 struct IPCTestFixture : public testing::Test {

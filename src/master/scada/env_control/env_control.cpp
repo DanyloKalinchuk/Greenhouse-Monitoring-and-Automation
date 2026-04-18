@@ -21,7 +21,7 @@ void EnvControl::change_parameter(SENS_FRAME frame){
 }
 
 EnvControl::EnvControl(std::unique_ptr<Actuator> temp_act, std::unique_ptr<Actuator> hum_act, 
-    std::unique_ptr<Actuator> moist_act, std::unique_ptr<Actuator> co2_act)
+    std::unique_ptr<Actuator> moist_act, std::unique_ptr<Actuator> co2_act) : radio()
 {
     this->temp_act = std::move(temp_act);
     this->hum_act = std::move(hum_act);
@@ -31,6 +31,13 @@ EnvControl::EnvControl(std::unique_ptr<Actuator> temp_act, std::unique_ptr<Actua
 
     this->comm_on.store(true);
     this->comm_thread = std::thread(&EnvControl::handle_comm, this);
+}
+
+EnvControl::EnvControl() : radio(0) {
+    this->temp_act = std::make_unique<Actuator>(10, 10);
+    this->hum_act = std::make_unique<Actuator>(10, 10);
+    this->moist_act = std::make_unique<Actuator>(10, 10);
+    this->co2_act = std::make_unique<Actuator>(10, 10);
 }
 
 EnvControl::~EnvControl(){
@@ -70,4 +77,13 @@ std::vector<SENS_FRAME> EnvControl::get_last_records(){
     }
 
     return active_sens_data;
+}
+
+void EnvControl::set_last_records(std::vector<SENS_FRAME> frames){
+    std::chrono::time_point now = std::chrono::system_clock::now();
+            std::lock_guard<std::mutex> last_rec_lock(this->last_rec_mtx);
+            
+            for (const SENS_FRAME& frame : frames){
+                this->last_records[frame.sensor_id] = {frame, std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count()};
+            }
 }

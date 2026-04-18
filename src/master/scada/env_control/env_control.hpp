@@ -28,7 +28,7 @@ enum EnvParams{
 };
 
 class EnvControl{
-    Radio radio = Radio();
+    Radio radio;
     std::map<uint8_t, std::pair<SENS_FRAME, uint64_t>> last_records;
 
     std::thread comm_thread;
@@ -48,6 +48,8 @@ class EnvControl{
     public:
     EnvControl(std::unique_ptr<Actuator> temp_act, std::unique_ptr<Actuator> hum_act, 
         std::unique_ptr<Actuator> moist_act, std::unique_ptr<Actuator> co2_act);
+
+    EnvControl();
     ~EnvControl();
 
     /*
@@ -57,6 +59,8 @@ class EnvControl{
     */
     void set_param(EnvParams env_param, int16_t X_perf, uint8_t X_error);
     std::vector<SENS_FRAME> get_last_records();
+
+    void set_last_records(std::vector<SENS_FRAME> frames);
 };
 
 #endif
