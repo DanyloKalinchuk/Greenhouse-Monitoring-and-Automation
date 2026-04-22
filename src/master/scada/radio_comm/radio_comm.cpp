@@ -138,7 +138,7 @@ SENS_FRAME Radio::handle_communications(){
     this->irq_line->wait_for_edge_event();
 
     bool tx_ok, tx_fail, rx_ready;
-    this->radio.whatHappened(&tx_ok, &tx_fail, &rx_ready);
+    this->radio.whatHappened(tx_ok, tx_fail, rx_ready);
 
     this->radio.available(&curr_pipe);
     if (curr_pipe == INIT_PIPE){
