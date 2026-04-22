@@ -1,11 +1,13 @@
 #ifndef RADIO_COMM
 #define RADIO_COMM
 
+#include "../gpio_line/gpio_line.hpp"
 #include <RF24/RF24.h>
 #include <iostream>
 #include <fstream>
 #include <cstdint>
 #include <map>
+#include <memory>
 #include <stdexcept>
 
 #include "radio_logs/radio_logs.hpp"
@@ -27,6 +29,7 @@
 
 #define CE 22
 #define CS 0
+#define IRQ 25
 
 struct SENS_FRAME{
     uint8_t sensor_id;
@@ -39,6 +42,7 @@ struct SENS_FRAME{
 class Radio{
     RF24 radio;
     RadioLogs radio_logs = RadioLogs(RADIO_LOGS_PATH);
+    std::unique_ptr<GPIOLine> irq_line = nullptr;
 
     protected:
     std::map<uint8_t, uint8_t> reg_sensors;

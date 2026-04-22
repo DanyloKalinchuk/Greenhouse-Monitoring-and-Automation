@@ -103,6 +103,7 @@ void Radio::sensor_handle_data(uint32_t sensor_data[SENSOR_DATA_SIZE], SENS_FRAM
 Radio::Radio(){
     this->radio_logs.log_out(MASTER_ID, MasterStart);
     this->radio = RF24(CE, CS);
+    this->irq_line = std::make_unique<GPIOLine>(IRQ);
 
     if (!this->radio.begin()){
         this->radio_logs.log_out(MASTER_ID, MasterFail);
@@ -133,7 +134,7 @@ SENS_FRAME Radio::handle_communications(){
     uint8_t curr_pipe;
     SENS_FRAME sens_frame;
 
-    while (!this->radio.available(&curr_pipe));
+    while (!this->irq_line->read());
 
     if (curr_pipe == INIT_PIPE){
         const uint8_t master_id = MASTER_ID;
