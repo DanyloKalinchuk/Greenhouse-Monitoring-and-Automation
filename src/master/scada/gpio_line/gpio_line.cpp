@@ -1,7 +1,10 @@
 #include "gpio_line.hpp"
 
-GPIOLine::GPIOLINE(uint8_t pin){
+#define GPIO_DIRECTION(input) ((input) ? GPIOD_LINE_DIRECTION_INPUT : GPIOD_LINE_DIRECTION_OUTPUT)
+
+GPIOLine::GPIOLine(uint8_t pin, bool input){
     this->pin = pin;
+	this->input = input;
 
     this->chip = gpiod_chip_open("/dev/gpiochip0");
 	if (!this->chip){
@@ -14,8 +17,12 @@ GPIOLine::GPIOLINE(uint8_t pin){
 		throw std::runtime_error("Failed to creat line_settings");
 	}
 
-    gpiod_line_settings_set_direction(settings, GPIOD_LINE_DIRECTION_OUTPUT);
+    gpiod_line_settings_set_direction(settings, GPIO_DIRECTION(input));
 	gpiod_line_settings_set_output_value(settings, GPIOD_LINE_VALUE_INACTIVE);
+	
+	if (input){
+		gpiod_line_settings_set_edge_detection(settings, GPIOD_LINE_EDGE_FALLING);
+	}
 
     struct gpiod_line_config *config = gpiod_line_config_new();
 	if (!config){
@@ -77,4 +84,10 @@ bool GPIOLine::read(){
     }
 
     return line_value == 1;
+}
+
+void GPIOLine::wait_for_edge_event(){
+	if (this->input){
+		gpiod_line_request_wait_edge_events(this->request, -1);
+	}
 }

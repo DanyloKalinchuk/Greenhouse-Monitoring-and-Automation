@@ -103,7 +103,7 @@ void Radio::sensor_handle_data(uint32_t sensor_data[SENSOR_DATA_SIZE], SENS_FRAM
 Radio::Radio(){
     this->radio_logs.log_out(MASTER_ID, MasterStart);
     this->radio = RF24(CE, CS);
-    this->irq_line = std::make_unique<GPIOLine>(IRQ);
+    this->irq_line = std::make_unique<GPIOLine>(IRQ, true);
 
     if (!this->radio.begin()){
         this->radio_logs.log_out(MASTER_ID, MasterFail);
@@ -115,6 +115,7 @@ Radio::Radio(){
     this->radio.setPALevel(RF24_PA_LOW);
     this->radio.setDataRate(RF24_250KBPS);
     this->radio.setRetries(10, 15);
+    this->radio.maskIRQ(true, true, false);
 
     this->radio.startListening();
     this->radio.openReadingPipe(INIT_PIPE, (uint8_t*)(INIT_ADDRESS));
@@ -134,8 +135,12 @@ SENS_FRAME Radio::handle_communications(){
     uint8_t curr_pipe;
     SENS_FRAME sens_frame;
 
-    while (!this->irq_line->read());
+    this->irq_line->wait_for_edge_event();
 
+    bool tx_ok, tx_fail, rx_ready;
+    this->radio.whatHappened(&tx_ok, &tx_fail, &rx_ready);
+
+    this->radio.available(&curr_pipe);
     if (curr_pipe == INIT_PIPE){
         const uint8_t master_id = MASTER_ID;
         uint8_t sensor_id;

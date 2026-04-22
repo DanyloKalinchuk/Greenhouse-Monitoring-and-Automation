@@ -10,13 +10,15 @@ class GPIOLine {
 	struct gpiod_line_request *request;
 
     uint8_t pin;
+    bool input;
 
     public:
-    GPIO_LINE(uint8_t pin);
-    ~GPIO_LINE();
+    GPIOLine(uint8_t pin, bool input);
+    ~GPIOLine();
 
     void write(bool level);
     bool read();
+    void wait_for_edge_event();
 };
 
 #endif
