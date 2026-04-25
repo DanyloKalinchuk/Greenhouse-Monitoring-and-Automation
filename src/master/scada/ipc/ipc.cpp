@@ -17,7 +17,7 @@ void IPC::ipc_handling(){
 }
 
 void IPC::ipc_write(uint16_t msg){
-    if (send(this->cfd, &msg, sizeof(msg)) < sizeof(msg)){
+    if (write(this->cfd, &msg, sizeof(msg)) < sizeof(msg)){
         throw std::runtime_error("Failed to SEND IPC message");
     }
 }
