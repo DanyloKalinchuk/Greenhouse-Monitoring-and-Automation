@@ -90,7 +90,7 @@ void GPIOLine::wait_for_edge_event(){
 	if (this->input){
 		gpiod_line_request_wait_edge_events(this->request, -1);
 
-		struct gpiod_edge_event* buff = gpiod_edge_event_buffer_new(1);
+		struct gpiod_edge_event_buffer* buff = gpiod_edge_event_buffer_new(1);
 		gpiod_line_request_read_edge_events(this->request, buff, 1);
 		gpiod_edge_event_buffer_free(buff);
 	}
