@@ -9,6 +9,7 @@ RadioLogs::RadioLogs(std::string path){
 }
 
 RadioLogs::~RadioLogs(){
+    this->log_file.flush();
     this->log_file.close();
 }
 
@@ -43,5 +44,4 @@ void RadioLogs::log_out(uint8_t initiator_id, MsgType msg_type){
     }
 
     this->log_file << log_msg << '\n';
-    this->log_file.flush();
 }
