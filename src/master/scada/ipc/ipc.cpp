@@ -7,15 +7,35 @@ void IPC::ipc_handling(){
 }
 
 void IPC::ipc_write(uint16_t msg){
-    if (write(this->cfd, &msg, sizeof(msg)) < sizeof(msg)){
-        throw std::runtime_error("Failed to SEND IPC message");
+    uint8_t* msg_ptr = reinterpret_cast<uint8_t*>(&msg);
+    int8_t bytes_to_write = sizeof(msg);
+
+    while (bytes_to_write > 0){
+        int8_t bytes_written = write(this->cfd, msg_ptr, bytes_to_write);
+
+        if (bytes_written <= 0){
+            throw std::runtime_error("Failed to SEND IPC message");
+        }
+
+        bytes_to_write -= bytes_written;
+        msg_ptr += bytes_written;
     }
 }
 
 uint16_t IPC::ipc_read(){
     uint16_t msg;
-    if (read(this->cfd, &msg, sizeof(msg)) < sizeof(msg)){
-        throw std::runtime_error("Failed to READ IPC message");
+    uint8_t* msg_ptr = reinterpret_cast<uint8_t*>(&msg);
+    int8_t bytes_to_read = sizeof(msg);
+
+    while (bytes_to_read > 0){
+        int8_t bytes_read = read(this->cfd, msg_ptr, bytes_to_read);
+
+        if (bytes_read <= 0){
+            throw std::runtime_error("Failed to READ IPC message");
+        }
+
+        bytes_to_read -= bytes_read;
+        msg_ptr += bytes_read;
     }
 
     return msg;
