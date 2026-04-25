@@ -14,6 +14,7 @@
 #include <atomic>
 #include <stdexcept>
 
+#define MSG_DISC (0)
 #define MSG_CONF (1)
 #define MSG_REQ (2)
 
@@ -24,6 +25,7 @@
 class IPC{
     std::thread ipc_thread;
     std::atomic<bool> ipc_on;
+    std::atomic<bool> disconnected;
 
     int sfd, cfd;
     struct sockaddr_un addr;

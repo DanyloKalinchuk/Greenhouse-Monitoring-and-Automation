@@ -2,40 +2,35 @@
 
 void IPC::ipc_handling(){
     while (this->ipc_on.load()){
+        if (this->disconnected.load()){
+            this->cfd = accept(this->sfd, NULL, NULL);
+            if (this->cfd == -1){
+                close(this->sfd);
+                close(this->cfd);
+                throw std::runtime_error("Failed to accept");
+            }
+            this->disconnected.store(false);
+        }
+
         this->handle_msg();
     }
 }
 
 void IPC::ipc_write(uint16_t msg){
-    uint8_t* msg_ptr = reinterpret_cast<uint8_t*>(&msg);
-    int8_t bytes_to_write = sizeof(msg);
-
-    while (bytes_to_write > 0){
-        int8_t bytes_written = write(this->cfd, msg_ptr, bytes_to_write);
-
-        if (bytes_written <= 0){
-            throw std::runtime_error("Failed to SEND IPC message");
-        }
-
-        bytes_to_write -= bytes_written;
-        msg_ptr += bytes_written;
+    if (send(this->cfd, &msg, sizeof(msg)) < sizeof(msg)){
+        throw std::runtime_error("Failed to SEND IPC message");
     }
 }
 
 uint16_t IPC::ipc_read(){
     uint16_t msg;
-    uint8_t* msg_ptr = reinterpret_cast<uint8_t*>(&msg);
-    int8_t bytes_to_read = sizeof(msg);
+    int32_t bytes_read = recv(this->cfd, &msg, sizeof(msg), MSG_NOSIGNAL);
 
-    while (bytes_to_read > 0){
-        int8_t bytes_read = read(this->cfd, msg_ptr, bytes_to_read);
-
-        if (bytes_read <= 0){
-            throw std::runtime_error("Failed to READ IPC message");
-        }
-
-        bytes_to_read -= bytes_read;
-        msg_ptr += bytes_read;
+    if (bytes_read == 0){
+        this->disconnected.store(true);
+        msg = MSG_DISC;
+    }else if (bytes_read < 0){
+        throw std::runtime_error("Failed to SEND IPC message");
     }
 
     return msg;
@@ -110,12 +105,7 @@ IPC::IPC() : env_control(
         throw std::runtime_error("Failed to listen");
     }
 
-    this->cfd = accept(this->sfd, NULL, NULL);
-    if (this->cfd == -1){
-        close(this->sfd);
-        close(this->cfd);
-        throw std::runtime_error("Failed to accept");
-    }
+    this->disconnected.store(true);
 
     this->ipc_on.store(true);
     this->ipc_thread = std::thread(&IPC::ipc_handling, this);
