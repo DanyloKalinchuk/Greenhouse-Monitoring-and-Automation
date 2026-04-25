@@ -1,6 +1,4 @@
 #include "ipc/ipc.hpp"
-#include <thread>
-#include <chrono>
 
 int main(){
     IPC ipc = IPC();

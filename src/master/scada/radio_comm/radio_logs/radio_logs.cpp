@@ -43,4 +43,5 @@ void RadioLogs::log_out(uint8_t initiator_id, MsgType msg_type){
     }
 
     this->log_file << log_msg << '\n';
+    this->log_file.flush();
 }
