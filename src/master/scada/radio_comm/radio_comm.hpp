@@ -23,8 +23,8 @@
 #define DEFAULT_ID (0)
 #define MASTER_ID (1)
 #define INIT_ADDRESS ("init_address")
-#define INIT_PIPE (1)
-#define DATA_PIPE (2)
+#define INIT_PIPE (0)
+#define DATA_PIPE (1)
 #define SENSOR_DATA_SIZE (5)
 
 #define CE 22
