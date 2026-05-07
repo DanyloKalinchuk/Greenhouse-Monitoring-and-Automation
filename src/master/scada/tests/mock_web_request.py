@@ -1,31 +1,14 @@
-import socket
+from  web_ipc import *
 
 SOCKET_PATH = "/tmp/SCADA_SOCK"
-REQ_MSG = 2
+ipc = IPC(SOCKET_PATH)
+sens_data = ipc.request()
 
-sfd = socket.socket(family=socket.AF_UNIX, type=socket.SOCK_STREAM)
-sfd.connect(SOCKET_PATH)
+print(f"Number of active sensors: {len(sens_data)}\n")
 
-print("Socket connected. Requesting data...\n")
-sfd.sendall(REQ_MSG.to_bytes(2, byteorder='little'))
-
-active_sensors = int.from_bytes(sfd.recv(2), byteorder='little')
-print(f"Number of active sensors: {active_sensors}\n")
-
-for _ in range(active_sensors):
-    buff = int.from_bytes(sfd.recv(2), byteorder='little')
-    print(f"Sensor ID: {buff}")
-
-    buff = int.from_bytes(sfd.recv(2), byteorder='little')
-    print(f"\tTemperature: {buff}")
-
-    buff = int.from_bytes(sfd.recv(2), byteorder='little')
-    print(f"\tHumidity: {buff}")
-
-    buff = int.from_bytes(sfd.recv(2), byteorder='little')
-    print(f"\tSoil Moisture: {buff}")
-
-    buff = int.from_bytes(sfd.recv(2), byteorder='little')
-    print(f"\tCO2: {buff}")
-
-sfd.close()
+for sensor in sens_data:
+    print(f"\tID: {sensor.id}")
+    print(f"\tTemperatur: {sensor.temp}")
+    print(f"\tHumidity: {sensor.hum}")
+    print(f"\tSoil Moisture: {sensor.moist}")
+    print(f"\tCO2: {sensor.co2}\n")
