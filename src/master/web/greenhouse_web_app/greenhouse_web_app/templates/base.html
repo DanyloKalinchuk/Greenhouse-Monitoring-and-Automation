@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="eng">
+    <head>
+        <title>{% block title %}Home{% endblock %}</title>
+        <link rel="stylesheet" href="{% static 'style.css' %}">
+    </head>
+    <body>
+        <div id="side_bar">
+            <a class="btn btn_side" href="/records">Records</a>
+            <a class="btn btn_side" href="/config">Configuration</a>
+        </div>
+
+        <div id="content">
+            {% block content %}{% endblock %}
+        </div>
+    </body>
+</html>

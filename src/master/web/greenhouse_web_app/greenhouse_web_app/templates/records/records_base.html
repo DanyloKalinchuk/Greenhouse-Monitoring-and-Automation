@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Records{% endblock %}
+
+{% block content %}
+    <dev class="form", id="search_form">
+        <h2>Filter by ID</h2>
+        <form>
+            <input type="number" name="sensor_id">
+            <button type="submit">Filter</button>
+        </form>
+    </dev>
+
+    {% block info %}{% endblock %}
+
+    <dev id="records_list">
+        {% if records %}
+            <table>
+                <tr>
+                    <th>Date</th>
+                    <th>Temperature</th>
+                    <th>Humidity</th>
+                    <th>Soil Moisture</th>
+                    <th>CO2</th>
+                </tr>
+
+                {% for record in records %}
+                    <tr>
+                        <td>{{ record.date }}</td>
+                        <td>{{ record.temperature }}</td>
+                        <td>{{ record.humidity }}</td>
+                        <td>{{ record.soil_moisture }}</td>
+                        <td>{{ record.co2 }}</td>
+                    </tr>
+                {% endfor %}
+
+            </table>
+        {% else %}
+            <h2>No records found</h2>
+        {% endif %}
+    </dev>
+{% endblock %}

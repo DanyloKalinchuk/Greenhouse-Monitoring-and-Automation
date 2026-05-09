@@ -1,2 +1,6 @@
 .vscode/
 build/
+venv/
+**/__pycache__
+**/migrations
+**/*.sql*
