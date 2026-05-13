@@ -13,9 +13,15 @@ uint8_t Radio::sensor_register(uint8_t sensor_id){
 
 void Radio::read_data_on_disk(){
     std::fstream saved_sensors(SAVE_PATH, std::ios::in | std::ios::binary);
-    if (!saved_sensors.is_open() || saved_sensors.peek() == EOF){
+    if (!saved_sensors.is_open()){
         this->radio_logs.log_out(MASTER_ID, MasterFileWarning);
+        this->update_data_on_disk();
         return;
+    }
+
+    if (saved_sensors.peek() == EOF){
+        this->radio_logs.log_out(MASTER_ID, MasterFileWarning);
+        return
     }
 
     this->reg_sensors = {};
