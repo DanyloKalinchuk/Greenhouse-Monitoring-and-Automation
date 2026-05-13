@@ -132,10 +132,6 @@ void Radio::sensor_handle_data(uint32_t sensor_data[SENSOR_DATA_SIZE], SENS_FRAM
         }
     }
 
-    if (sens_frame->sensor_id == DEFAULT_ID){
-        sens_frame->sensor_id = this->sensor_register(sensor_data[0]);
-    }
-
     this->radio_logs.log_out(sens_frame->sensor_id, SensorRead);
 
     sens_frame->humidity = sensor_data[1];
