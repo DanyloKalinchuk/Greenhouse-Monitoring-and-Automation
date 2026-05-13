@@ -19,8 +19,6 @@ extern "C"{
 #define CE 7
 #define CS 10
 
-void init_wdt();
-
 const uint8_t init_address[] = "init_address";
 mstr_sens_ids::M_S_IDS ms_ids = mstr_sens_ids::read();
 uint32_t data_to_send[2];
@@ -58,7 +56,7 @@ void setup() {
   radio.openWritingPipe((uint64_t)ms_ids.master);
 
   timer.start(10000);
-  init_wdt();
+  wdt_enable(WDTO_2S);
   sei();
 }
 
@@ -80,11 +78,6 @@ void loop() {
     radio.write(data_to_send, sizeof(data_to_send));
   }
 
-}
-
-void init_wdt(){
-  WDTCSR |= (1U << 5);
-  WDTCSR |= (1U << 3);
 }
 
 ISR(TIMER1_COMPA_vect){
