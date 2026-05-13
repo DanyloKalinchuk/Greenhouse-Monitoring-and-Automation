@@ -21,7 +21,7 @@ void Radio::read_data_on_disk(){
 
     if (saved_sensors.peek() == EOF){
         this->radio_logs.log_out(MASTER_ID, MasterFileWarning);
-        return
+        return;
     }
 
     this->reg_sensors = {};
