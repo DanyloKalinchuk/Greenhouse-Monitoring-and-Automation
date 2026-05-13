@@ -61,11 +61,11 @@ TEST_F(RadioCommFixture, SensorRegistration){
 
     ASSERT_EQ(sensors.size(), 2);
 
-    ASSERT_EQ(sensors.count(sens1_id), 1);
-    EXPECT_EQ(sensors.at(sens1_id), sens1_expected_inner_id);
+    ASSERT_EQ(sensors.count(sens1_expected_inner_id), 1);
+    EXPECT_EQ(sensors.at(sens1_expected_inner_id), sens1_id);
 
-    ASSERT_EQ(sensors.count(sens2_id), 1);
-    EXPECT_EQ(sensors.at(sens2_id), sens2_expected_inner_id);
+    ASSERT_EQ(sensors.count(sens2_expected_inner_id), 1);
+    EXPECT_EQ(sensors.at(sens2_expected_inner_id), sens2_id);
 }
 
 TEST_F(RadioCommFixture, DataHandlingFromUnregisteredSensor){
@@ -91,6 +91,7 @@ TEST_F(RadioCommFixture, DataHandlingFromUnregisteredSensor){
 TEST_F(RadioCommFixture, DataHandlingFromRegisteredSensor){
     uint32_t sensor_data[SENSOR_DATA_SIZE];
     SENS_FRAME frame;
+    uint8_t expected_inner_id = 1;
 
     sensor_data[0] = 25;
     sensor_data[1] = 30;
@@ -101,7 +102,8 @@ TEST_F(RadioCommFixture, DataHandlingFromRegisteredSensor){
     radio.call_sensor_init(sensor_data[0]);
     radio.call_sensor_handle_data(sensor_data, &frame);
 
-    EXPECT_EQ(frame.sensor_id, radio.get_sensors().at(sensor_data[0]));
+    EXPECT_EQ(sensor_data[0], radio.get_sensors().at(expected_inner_id));
+    EXPECT_EQ(frame.sensor_id, expected_inner_id);
     EXPECT_EQ(frame.humidity, sensor_data[1]);
     EXPECT_EQ(frame.temperature, sensor_data[2]);
     EXPECT_EQ(frame.co2, sensor_data[3]);
@@ -123,16 +125,16 @@ TEST_F(RadioCommFixture, ReadUpdateSaves){
 
     ids_read = radio.get_sensors();
 
-    ASSERT_NO_THROW(ids_read.at(8));
-    ASSERT_NO_THROW(ids_init.at(8));
-    EXPECT_EQ(ids_read.at(8), ids_init.at(8));
+    ASSERT_NO_THROW(ids_read.at(1));
+    ASSERT_NO_THROW(ids_init.at(1));
+    EXPECT_EQ(ids_read.at(1), ids_init.at(1));
 
-    ASSERT_NO_THROW(ids_read.at(16));
-    ASSERT_NO_THROW(ids_init.at(16));
-    EXPECT_EQ(ids_read.at(16), ids_init.at(16));
+    ASSERT_NO_THROW(ids_read.at(2));
+    ASSERT_NO_THROW(ids_init.at(2));
+    EXPECT_EQ(ids_read.at(2), ids_init.at(2));
 
-    ASSERT_NO_THROW(ids_read.at(32));
-    ASSERT_NO_THROW(ids_init.at(32));
-    EXPECT_EQ(ids_read.at(32), ids_init.at(32));
+    ASSERT_NO_THROW(ids_read.at(3));
+    ASSERT_NO_THROW(ids_init.at(3));
+    EXPECT_EQ(ids_read.at(3), ids_init.at(3));
 }
 
