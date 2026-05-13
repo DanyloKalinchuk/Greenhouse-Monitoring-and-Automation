@@ -13,7 +13,7 @@
 #include <utility>
 #include <memory>
 
-#define ACTIVE_TIME_LIMIT_SEC 250
+#define ACTIVE_TIME_LIMIT_SEC 25 // 2.5 data readings on the sensor side
 
 #define TEMP_ACT_LINE 1
 #define HUM_ACT_LINE 2
