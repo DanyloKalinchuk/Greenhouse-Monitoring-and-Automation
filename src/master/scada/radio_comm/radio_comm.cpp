@@ -6,6 +6,8 @@ uint8_t Radio::sensor_register(uint8_t sensor_id){
     this->next_sens_id++;
     this->radio_logs.log_out(inner_id, SensorRegistered);
 
+    this->add_sensor_on_disk();
+
     return inner_id;
 }
 
@@ -70,7 +72,7 @@ void Radio::update_data_on_disk(){
 }
 
 void Radio::add_sensor_on_disk(){
-    std::fstream saved_sensors(SAVE_PATH, std::ios::out | std::ios::binary);
+    std::fstream saved_sensors(SAVE_PATH, std::ios::in | std::ios::out | std::ios::binary);
     if (!saved_sensors.is_open()){
         this->radio_logs.log_out(MASTER_ID, MasterFail);
         throw std::runtime_error((std::string)("Failed to open the save file: ") + (std::string)SAVE_PATH);
@@ -84,9 +86,9 @@ void Radio::add_sensor_on_disk(){
         throw std::runtime_error("Failed to write next_sens_id value");
     }
 
-    saved_sensors.seekp(std::ios::end);
+    saved_sensors.seekp(0, std::fstream::end);
 
-    uint8_t sens_in_id = this->next_sens_id--;
+    uint8_t sens_in_id = this->next_sens_id - 1;
     uint8_t sens_out_id = this->reg_sensors[sens_in_id];
 
     saved_sensors.write(reinterpret_cast<const char *>(&sens_in_id), sizeof(sens_in_id));
@@ -97,6 +99,8 @@ void Radio::add_sensor_on_disk(){
         saved_sensors.close();
         throw std::runtime_error("Failed to write id map entry");
     }
+
+    saved_sensors.close();
 }
 
 void Radio::sensor_init(uint8_t sensor_id){
