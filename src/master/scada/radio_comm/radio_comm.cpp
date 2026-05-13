@@ -1,5 +1,14 @@
 #include "radio_comm.hpp"
 
+uint8_t Radio::sensor_register(uint8_t sensor_id){
+    this->reg_sensors[this->next_sens_id] = sensor_id;
+    uint8_t inner_id = this->next_sens_id;
+    this->next_sens_id++;
+    this->radio_logs.log_out(inner_id, SensorRegistered);
+
+    return inner_id;
+}
+
 void Radio::read_data_on_disk(){
     std::fstream saved_sensors(SAVE_PATH, std::ios::in | std::ios::binary);
     if (!saved_sensors.is_open() || saved_sensors.peek() == EOF){
@@ -16,9 +25,9 @@ void Radio::read_data_on_disk(){
     }
 
     for (int i = 0; i < (this->next_sens_id - 1); i++){
-        uint8_t key, id;
-        saved_sensors.read(reinterpret_cast<char *>(&key), sizeof(key));
-        saved_sensors.read(reinterpret_cast<char *>(&id), sizeof(id));
+        uint8_t sens_in_id, sens_out_id;
+        saved_sensors.read(reinterpret_cast<char *>(&sens_in_id), sizeof(sens_in_id));
+        saved_sensors.read(reinterpret_cast<char *>(&sens_out_id), sizeof(sens_out_id));
         
         if (saved_sensors.fail()){
             this->radio_logs.log_out(MASTER_ID, MasterFail);
@@ -26,7 +35,7 @@ void Radio::read_data_on_disk(){
             throw std::runtime_error("Failed to read id map entry");
         }
 
-        this->reg_sensors[key] = id;
+        this->reg_sensors[sens_in_id] = sens_out_id;
     }
 
     saved_sensors.close();
@@ -46,9 +55,9 @@ void Radio::update_data_on_disk(){
         throw std::runtime_error("Failed to write next_sens_id value");
     }
 
-    for (const auto [key, id] : this->reg_sensors){
-        saved_sensors.write(reinterpret_cast<const char *>(&key), sizeof(key));
-        saved_sensors.write(reinterpret_cast<const char *>(&id), sizeof(id));
+    for (const auto [sens_in_id, sens_out_id] : this->reg_sensors){
+        saved_sensors.write(reinterpret_cast<const char *>(&sens_in_id), sizeof(sens_in_id));
+        saved_sensors.write(reinterpret_cast<const char *>(&sens_out_id), sizeof(sens_out_id));
 
         if (saved_sensors.fail()){
             this->radio_logs.log_out(MASTER_ID, MasterFail);
@@ -60,23 +69,50 @@ void Radio::update_data_on_disk(){
     saved_sensors.close();
 }
 
+void Radio::add_sensor_on_disk(){
+    std::fstream saved_sensors(SAVE_PATH, std::ios::out | std::ios::binary);
+    if (!saved_sensors.is_open()){
+        this->radio_logs.log_out(MASTER_ID, MasterFail);
+        throw std::runtime_error((std::string)("Failed to open the save file: ") + (std::string)SAVE_PATH);
+    }
+
+    saved_sensors.seekp(0);
+    saved_sensors.write(reinterpret_cast<char *>(&this->next_sens_id), sizeof(this->next_sens_id));
+    if (saved_sensors.fail()){
+        this->radio_logs.log_out(MASTER_ID, MasterFail);
+        saved_sensors.close();
+        throw std::runtime_error("Failed to write next_sens_id value");
+    }
+
+    saved_sensors.seekp(std::ios::end);
+
+    uint8_t sens_in_id = this->next_sens_id--;
+    uint8_t sens_out_id = this->reg_sensors[sens_in_id];
+
+    saved_sensors.write(reinterpret_cast<const char *>(&sens_in_id), sizeof(sens_in_id));
+    saved_sensors.write(reinterpret_cast<const char *>(&sens_out_id), sizeof(sens_out_id));
+
+    if (saved_sensors.fail()){
+        this->radio_logs.log_out(MASTER_ID, MasterFail);
+        saved_sensors.close();
+        throw std::runtime_error("Failed to write id map entry");
+    }
+}
+
 void Radio::sensor_init(uint8_t sensor_id){
     bool is_registered = false;
     uint8_t inner_id;
 
-    for (const auto [key, id] : this->reg_sensors){
-        if (key == sensor_id){
+    for (const auto [sens_in_id, sens_out_id] : this->reg_sensors){
+        if (sens_out_id == sensor_id){
             is_registered = true;
-            inner_id = id;
+            inner_id = sens_in_id;
             break;
         }
     }
 
     if (!is_registered){
-        this->reg_sensors[sensor_id] = this->next_sens_id;
-        inner_id = this->next_sens_id;
-        this->next_sens_id++;
-        this->radio_logs.log_out(inner_id, SensorRegistered);
+        inner_id = this->sensor_register(sensor_id);
     }
 
     this->radio_logs.log_out(inner_id, SensorInit);
@@ -85,19 +121,23 @@ void Radio::sensor_init(uint8_t sensor_id){
 void Radio::sensor_handle_data(uint32_t sensor_data[SENSOR_DATA_SIZE], SENS_FRAME* sens_frame){
     sens_frame->sensor_id = DEFAULT_ID;
 
-        for (const auto [key, id] : this->reg_sensors){
-            if (key == sensor_data[0]){
-                sens_frame->sensor_id = id;
-                break;
-            }
+    for (const auto [sens_in_id, sens_out_id] : this->reg_sensors){
+        if (sens_out_id == sensor_data[0]){
+            sens_frame->sensor_id = sens_in_id;
+            break;
         }
+    }
 
-        this->radio_logs.log_out(sens_frame->sensor_id, SensorRead);
+    if (sens_frame->sensor_id == DEFAULT_ID){
+        sens_frame->sensor_id = this->sensor_register(sensor_data[0]);
+    }
 
-        sens_frame->humidity = sensor_data[1];
-        sens_frame->temperature = sensor_data[2];
-        sens_frame->co2 = sensor_data[3];
-        sens_frame->soil_moisture = sensor_data[4];
+    this->radio_logs.log_out(sens_frame->sensor_id, SensorRead);
+
+    sens_frame->humidity = sensor_data[1];
+    sens_frame->temperature = sensor_data[2];
+    sens_frame->co2 = sensor_data[3];
+    sens_frame->soil_moisture = sensor_data[4];
 }
 
 Radio::Radio(){

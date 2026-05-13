@@ -44,14 +44,17 @@ class Radio{
     RadioLogs radio_logs = RadioLogs(RADIO_LOGS_PATH);
     std::unique_ptr<GPIOLine> irq_line = nullptr;
 
+    uint8_t sensor_register(uint8_t sensor_id);
+
     protected:
     std::map<uint8_t, uint8_t> reg_sensors;
     uint8_t next_sens_id = 1;
 
     void read_data_on_disk();
     void update_data_on_disk();
+    void add_sensor_on_disk();
 
-    void sensor_init(uint8_t senor_id);
+    void sensor_init(uint8_t sensor_id);
     void sensor_handle_data(uint32_t sensor_data[SENSOR_DATA_SIZE], SENS_FRAME* sens_frame);
 
     public:
