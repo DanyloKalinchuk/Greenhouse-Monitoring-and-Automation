@@ -16,7 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from . import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('greenhouse', views.home, name="home"),
+    path('greenhouse/records', views.records, name="all_records"),
+    path('greenhouse/config', views.config, name="config"),
 ]
