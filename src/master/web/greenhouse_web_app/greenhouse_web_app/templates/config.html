@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Configuration{% endblock %}
+
+{% block content %}
+    <form class="form" id="config_form">
+        {% for parameter, default_perf, default_error in parameters %}
+            <div class="parameter_conf">
+                <label for="{{ parameter }}_perf">{{ parameter }}_per</label><input type="number" id="{{ parameter }}_perf" value="{{ default_perf }}" required>
+                <label for="{{ parameter }}_error">{{ parameter }}_error</label><input type="number" id="{{ parameter }}_error" value="{{ default_error }}" required>
+            </div>
+        {% endfor %}
+        <button type="submit">Set Parameters</button>
+    </form>
+{% endblock %}

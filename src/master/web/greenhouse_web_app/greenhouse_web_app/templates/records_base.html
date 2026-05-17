@@ -3,20 +3,29 @@
 {% block title %}Records{% endblock %}
 
 {% block content %}
-    <dev class="form", id="search_form">
-        <h2>Filter by ID</h2>
-        <form>
-            <input type="number" name="sensor_id">
-            <button type="submit">Filter</button>
+    <div class="form_div">
+        <form  id="search_form" action="/greenhouse/records" method="post">
+            {% csrf_token %}
+            <select id="form_input_options" name="form_input_options" required>
+                <option value="id">Sensor ID</option>
+                <option value="date">Date</option>
+            </select>
+
+            <input type="number" name="search_input" id="search_input" required>
+            <button class="btn" type="submit">Filter</button>
         </form>
-    </dev>
+        <a class="btn" href="/greenhouse/records">Reset Filter</a>
+    </div>
 
-    {% block info %}{% endblock %}
+    {% if filtered %}
+        <h3 class="filter_info">{{ info }}</h3>
+    {% endif %}
 
-    <dev id="records_list">
+    <div id="records_list">
         {% if records %}
             <table>
                 <tr>
+                    <th>Sensor ID</th>
                     <th>Date</th>
                     <th>Temperature</th>
                     <th>Humidity</th>
@@ -26,6 +35,7 @@
 
                 {% for record in records %}
                     <tr>
+                        <td>{{ record.sensor_id }}</td>
                         <td>{{ record.date }}</td>
                         <td>{{ record.temperature }}</td>
                         <td>{{ record.humidity }}</td>
@@ -38,5 +48,8 @@
         {% else %}
             <h2>No records found</h2>
         {% endif %}
-    </dev>
+    </div>
+
+    {% load static %}
+    <script src="{% static 'js/records_script.js' %}" defer></script>
 {% endblock %}
