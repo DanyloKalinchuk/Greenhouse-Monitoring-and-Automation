@@ -1,5 +1,4 @@
 import threading
-import time
 from web_ipc import IPC, SensFrame
 
 SOCKET_PATH = "/tmp/SCADA_SOCK"
@@ -11,7 +10,7 @@ class Web:
     _ipc_lock = threading.Lock()
     _ipc: IPC
     _ipc_req_thread: threading.Thread
-    _ipc_thread_on = False
+    _ipc_request_event = threading.Event()
 
     def __init__(self):
         self._ipc = IPC(SOCKET_PATH)
@@ -36,8 +35,7 @@ class Web:
     def _handle_request(self):
         from greenhouse_web_app.greenhouse_web_app.models import SensorData
 
-        while self._ipc_thread_on:
-            time.sleep(REQ_DELAY_SEC)
+        while not self._ipc_request_event.wait(REQ_DELAY_SEC):
 
             with self._ipc_lock:
                 sensors = self._ipc.request()
@@ -47,10 +45,12 @@ class Web:
                 sensor_record.sensor_id = sensor.id
                 sensor_record.temperature = sensor.temp
                 sensor_record.humidity = sensor.hum
-                sensor_record.soild_moisture = sensor.moist
+                sensor_record.soil_moisture = sensor.moist
                 sensor_record.co2 = sensor.co2
 
                 sensor_record.save()
+
+            self._ipc_request_event.clear()
 
     def handle_config(self, temp_perf, temp_error, hum_perf, hum_error, moist_perf, moist_error, co2_perf, co2_error):
         with self._ipc_lock:

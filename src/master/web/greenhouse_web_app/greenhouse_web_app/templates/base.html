@@ -8,8 +8,17 @@
     </head>
     <body>
         <div id="side_bar">
-            <a class="btn btn_side" href="/greenhouse/records">Records</a>
-            <a class="btn btn_side" href="/greenhouse/config">Configuration</a>
+            <a class="btn bar_btn" href="/greenhouse/records">Records</a>
+            <a class="btn bar_btn" href="/greenhouse/config">Configuration</a>
+        
+            <div id="bottom_btns">
+                <a class="btn" id="help_btn" href="/greenhouse/help"><img src="{% static 'help_btn.png' %}" alt="Help"></a>
+                <a class="btn" id="home_btn" href="/greenhouse"><img src="{% static 'home_btn.png' %}" alt="Home"></a>
+            </div>
+        </div>
+
+        <div id="page_header_div">
+            <h1 class="page_header">{% block page_header %}Home{% endblock %}</h1>
         </div>
 
         <div id="content">

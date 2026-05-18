@@ -36,16 +36,21 @@ def config(request):
 
     if request.method == 'POST':
         pass
+        web_instance = None
 
-        Web.get_instance().handle_config(
-            request.POST.get("temp_perf"),
-            request.POST.get("temp_error"),
-            request.POST.get("hum_perf"),
-            request.POST.get("hum_error"),
-            request.POST.get("moist_perf"),
-            request.POST.get("moist_error"),
-            request.POST.get("co2_perf"),
-            request.POST.get("co2_error")
-        )
+        try:
+            web_instance = Web.get_instance()
+            web_instance.handle_config(
+                request.POST.get("temp_perf"),
+                request.POST.get("temp_error"),
+                request.POST.get("hum_perf"),
+                request.POST.get("hum_error"),
+                request.POST.get("moist_perf"),
+                request.POST.get("moist_error"),
+                request.POST.get("co2_perf"),
+                request.POST.get("co2_error")
+            )
+        except:
+            print("Failed to get the Web instance")
 
     return render(request, 'config.html', {'parameters': parameters})

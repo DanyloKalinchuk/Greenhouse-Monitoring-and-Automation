@@ -2,8 +2,10 @@
 
 {% block title %}Records{% endblock %}
 
+{% block page_header %}Records{% endblock %}
+
 {% block content %}
-    <div class="form_div">
+    <div class="form_div filter_form_div">
         <form  id="search_form" action="/greenhouse/records" method="post">
             {% csrf_token %}
             <select id="form_input_options" name="form_input_options" required>
@@ -30,7 +32,7 @@
                     <th>Temperature</th>
                     <th>Humidity</th>
                     <th>Soil Moisture</th>
-                    <th>CO2</th>
+                    <th class="top_left_td">CO2</th>
                 </tr>
 
                 {% for record in records %}
@@ -40,7 +42,7 @@
                         <td>{{ record.temperature }}</td>
                         <td>{{ record.humidity }}</td>
                         <td>{{ record.soil_moisture }}</td>
-                        <td>{{ record.co2 }}</td>
+                        <td class="top_left_td">{{ record.co2 }}</td>
                     </tr>
                 {% endfor %}
 
