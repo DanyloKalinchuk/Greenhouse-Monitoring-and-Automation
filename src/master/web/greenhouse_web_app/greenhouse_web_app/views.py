@@ -13,6 +13,9 @@ from web import Web
 def home(request):
     return render(request, 'base.html')
 
+def help(request):
+    return render(request,  'help.html')
+
 def records(request):
     if request.method == 'GET':
         records = SensorData.objects.order_by('-date')
@@ -35,7 +38,6 @@ def config(request):
     ]
 
     if request.method == 'POST':
-        pass
         web_instance = None
 
         try:
