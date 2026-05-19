@@ -33,7 +33,7 @@ class Web:
         return Web._instance
     
     def _handle_request(self):
-        from greenhouse_web_app.greenhouse_web_app.models import SensorData
+        from greenhouse_web_app.models import SensorData
 
         while not self._ipc_request_event.wait(REQ_DELAY_SEC):
 
