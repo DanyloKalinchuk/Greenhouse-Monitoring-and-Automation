@@ -19,6 +19,8 @@ extern "C"{
 #define CE 7
 #define CS 10
 
+#define SENSOR_DELAY 10000
+
 const uint8_t init_address[] = "init_address";
 mstr_sens_ids::M_S_IDS ms_ids = mstr_sens_ids::read();
 uint32_t data_to_send[2];
@@ -55,7 +57,7 @@ void setup() {
   radio.stopListening();
   radio.openWritingPipe((uint64_t)ms_ids.master);
 
-  timer.start(10000);
+  timer.start(SENSOR_DELAY);
   wdt_enable(WDTO_2S);
   sei();
 }
