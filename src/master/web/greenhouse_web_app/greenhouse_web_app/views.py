@@ -1,6 +1,10 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from .models import SensorData
+from django.db.models import Avg, Max, Min
+from django.db.models.functions import TruncDay, TruncHour
+from django.core.serializers.json import DjangoJSONEncoder
+import json
 
 import sys
 import os
@@ -17,17 +21,76 @@ def help(request):
     return render(request,  'help.html')
 
 def records(request):
-    if request.method == 'GET':
-        records = SensorData.objects.order_by('-date')
+    records = SensorData.objects.all().order_by('-date')
 
-        return render(request, 'records_base.html', {'records': records})
+    if request.method == 'GET':
+        records_chart_avg = records.order_by().annotate(day=TruncDay("date")).values("day").annotate(
+            temp_avg = Avg("temperature"),
+            hum_avg = Avg("humidity"),
+            moist_avg = Avg("soil_moisture"),
+            co2_avg = Avg("co2")
+        )
+
+        records_chart_min_max = records.order_by().annotate(day=TruncDay("date")).values("day").annotate(
+            temp_min = Min("temperature"),
+            temp_max = Max("temperature"),
+
+            hum_min = Min("humidity"),
+            hum_max = Max("humidity"),
+
+            moist_min = Min("soil_moisture"),
+            moist_max = Max("soil_moisture"),
+
+            co2_min = Min("co2"),
+            co2_max = Max("co2"),
+        )
+
+        records_chart_avg = json.dumps(list(records_chart_avg), cls=DjangoJSONEncoder)
+        records_chart_min_max = json.dumps(list(records_chart_min_max), cls=DjangoJSONEncoder)
+
+        return render(request, 'records_base.html', {
+            'records': records,
+            'chart_avg': records_chart_avg, 
+            'chart_min_max': records_chart_min_max,
+        })
+    
     elif request.method == 'POST':
         if request.POST.get("form_input_options") == "id":
             sensor_id = request.POST.get("search_input")
-            records = SensorData.objects.filter(sensor_id=sensor_id).order_by('-date')
+            records = records.filter(sensor_id=sensor_id)
             info = f"ID: {sensor_id}"
+
+            records_chart_avg = records.order_by().annotate(day=TruncDay("date")).values("day").annotate(
+                temp_avg = Avg("temperature"),
+                hum_avg = Avg("humidity"),
+                moist_avg = Avg("soil_moisture"),
+                co2_avg = Avg("co2")
+            )
+
+            records_chart_min_max = records.order_by().annotate(day=TruncDay("date")).values("day").annotate(
+                temp_min = Min("temperature"),
+                temp_max = Max("temperature"),
+
+                hum_min = Min("humidity"),
+                hum_max = Max("humidity"),
+
+                moist_min = Min("soil_moisture"),
+                moist_max = Max("soil_moisture"),
+
+                co2_min = Min("co2"),
+                co2_max = Max("co2"),
+            )
+
+            records_chart_avg = json.dumps(list(records_chart_avg), cls=DjangoJSONEncoder)
+            records_chart_min_max = json.dumps(list(records_chart_min_max), cls=DjangoJSONEncoder)
             
-        return render(request, 'records_base.html', {'filtered': True, 'records': records, 'info': info})
+        return render(request, 'records_base.html', {
+            'filtered': True, 
+            'records': records, 
+            'info': info, 
+            'chart_avg': records_chart_avg, 
+            'chart_min_max': records_chart_min_max,
+        })
 
 def config(request):
     parameters = [

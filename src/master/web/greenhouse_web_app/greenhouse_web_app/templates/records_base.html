@@ -4,6 +4,10 @@
 
 {% block page_header %}Records{% endblock %}
 
+{% block dependencies %}
+    <script src="https://cdn.plot.ly/plotly-3.5.1.min.js" charset="utf-8"></script><script></script>
+{% endblock %}
+
 {% block content %}
     <div class="form_div filter_form_div">
         <form  id="search_form" action="/greenhouse/records" method="post">
@@ -17,40 +21,54 @@
             <button class="btn" type="submit">Filter</button>
         </form>
         <a class="btn" href="/greenhouse/records">Reset Filter</a>
+        
+        <div id="chart_checkbox">
+            <label for="display_chart">Display Chart</label>
+            <input type="checkbox" id="display_chart">
+        </div>
     </div>
 
     {% if filtered %}
         <h3 class="filter_info">{{ info }}</h3>
     {% endif %}
 
-    <div id="records_list">
-        {% if records %}
-            <table>
-                <tr>
-                    <th>Sensor ID</th>
-                    <th>Date</th>
-                    <th>Temperature</th>
-                    <th>Humidity</th>
-                    <th>Soil Moisture</th>
-                    <th class="top_left_td">CO2</th>
-                </tr>
-
-                {% for record in records %}
+    <div id="records">
+        <div id="records_list">
+            {% if records %}
+                <table>
                     <tr>
-                        <td>{{ record.sensor_id }}</td>
-                        <td>{{ record.date }}</td>
-                        <td>{{ record.temperature }}</td>
-                        <td>{{ record.humidity }}</td>
-                        <td>{{ record.soil_moisture }}</td>
-                        <td class="top_left_td">{{ record.co2 }}</td>
+                        <th>Sensor ID</th>
+                        <th>Date</th>
+                        <th>Temperature</th>
+                        <th>Humidity</th>
+                        <th>Soil Moisture</th>
+                        <th class="top_left_td">CO2</th>
                     </tr>
-                {% endfor %}
 
-            </table>
-        {% else %}
-            <h2>No records found</h2>
-        {% endif %}
+                    {% for record in records %}
+                        <tr>
+                            <td>{{ record.sensor_id }}</td>
+                            <td>{{ record.date }}</td>
+                            <td>{{ record.temperature }}</td>
+                            <td>{{ record.humidity }}</td>
+                            <td>{{ record.soil_moisture }}</td>
+                            <td class="top_left_td">{{ record.co2 }}</td>
+                        </tr>
+                    {% endfor %}
+
+                </table>
+            {% else %}
+                <h2>No records found</h2>
+            {% endif %}
+        </div>
+
+        <div id="chart_div"></div>
     </div>
+
+    <script>
+        const avg = {{ chart_avg|safe }};
+        const min_max = {{ chart_min_max|safe }};
+    </script>
 
     {% load static %}
     <script src="{% static 'js/records_script.js' %}" defer></script>

@@ -1,4 +1,5 @@
 from django.db import models
+from rest_framework import serializers
 
 class SensorData(models.Model):
     sensor_id = models.IntegerField()
@@ -13,3 +14,8 @@ class SensorData(models.Model):
     
     class Meta:
         app_label = 'greenhouse_web_app'
+
+class SensorDataSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SensorData
+        fields = ['sensor_id', "date", "temperature", "humidity", "soil_moisture", "co2"]

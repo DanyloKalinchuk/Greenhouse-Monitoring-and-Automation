@@ -112,6 +112,8 @@ body, html {
 #content {
     margin-left: 175px;
     padding-right: 2%;
+    display: flex;
+    flex-direction: column;
 }
 
 #page_header_div{
@@ -202,6 +204,24 @@ h2, h3 {
     font-weight: 500;
 }
 
-#records_list {
+#chart {
+    width: 100%;
+    height: 400px;
+}
+
+#records {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
     overflow-x: auto;
+}
+
+#records_list {
+    flex: 1;
+}
+
+#chart_div {
+    flex: 1;
+    min-width: 400px;
+    display: none;
 }
