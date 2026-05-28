@@ -55,6 +55,10 @@ def records(request):
         })
     
     elif request.method == 'POST':
+        info = ""
+        records_chart_avg = None
+        records_chart_min_max = None
+
         if request.POST.get("form_input_options") == "id":
             sensor_id = request.POST.get("search_input")
             records = records.filter(sensor_id=sensor_id)
@@ -81,8 +85,34 @@ def records(request):
                 co2_max = Max("co2"),
             )
 
-            records_chart_avg = json.dumps(list(records_chart_avg), cls=DjangoJSONEncoder)
-            records_chart_min_max = json.dumps(list(records_chart_min_max), cls=DjangoJSONEncoder)
+        elif request.POST.get("form_input_options") == "date":
+            date = request.POST.get("search_input")
+            records = records.filter(date__date=date)
+            info = f"Date: {date}"
+
+            records_chart_avg = records.order_by().annotate(hour=TruncHour("date")).values("hour").annotate(
+                temp_avg = Avg("temperature"),
+                hum_avg = Avg("humidity"),
+                moist_avg = Avg("soil_moisture"),
+                co2_avg = Avg("co2")
+            )
+
+            records_chart_min_max = records.order_by().annotate(hour=TruncHour("date")).values("hour").annotate(
+                temp_min = Min("temperature"),
+                temp_max = Max("temperature"),
+
+                hum_min = Min("humidity"),
+                hum_max = Max("humidity"),
+
+                moist_min = Min("soil_moisture"),
+                moist_max = Max("soil_moisture"),
+
+                co2_min = Min("co2"),
+                co2_max = Max("co2"),
+            )
+
+        records_chart_avg = json.dumps(list(records_chart_avg), cls=DjangoJSONEncoder)
+        records_chart_min_max = json.dumps(list(records_chart_min_max), cls=DjangoJSONEncoder)
             
         return render(request, 'records_base.html', {
             'filtered': True, 
