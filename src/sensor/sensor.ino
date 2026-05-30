@@ -1,3 +1,10 @@
+/**
+ * \file
+ * \brief Main file for the Sensor device
+ * 
+ * \todo Add CO2 and Soil Moisture sensors hadling using adc.h
+ */
+
 #include <avr/io.h>
 #include <avr/wdt.h>
 #include <util/delay.h>
@@ -13,25 +20,28 @@ extern "C"{
   #include "adc.h"
 }
 
-#define INIT_PIPE 0
+#define INIT_PIPE 0 ///< Pipe number for the Sensor initialization
 
-#define DHT11_PIN 4
-#define CE 7
-#define CS 10
+#define DHT11_PIN 4 ///< Pin number to which the DHT11 sensor is connected
+#define CE 7 ///< CE line of the nRF24L01 module
+#define CS 10 ///< CS line of the nRF24L01 module
 
-#define SENSOR_DELAY 10000
+#define SENSOR_DELAY 10000 ///< Delay for the sensor data sending loop
 
-const uint8_t init_address[] = "init_address";
+const uint8_t init_address[] = "init_address"; ///< Address for Sensor initialization. Must be identical to the INIT_ADDRESS in \ref radio_comm.hpp
 mstr_sens_ids::M_S_IDS ms_ids = mstr_sens_ids::read();
-uint32_t data_to_send[2];
 RF24 radio = RF24(CE, CS);
 
 DHT11 dht = DHT11(DHT11_PIN);
 DHT11_DATA dht_data;
 
 Timer timer(TIMER_UNITS::TIMER_MS);
-volatile uint8_t timer_flag;
+volatile uint8_t timer_flag; ///< Flag set by the Timer's ISR
 
+/**
+ * \brief Initializes Sensor
+ * Starts Sensor initialization sequence if Master ID is set to default. Starts Timer and WDT.
+ */
 void setup() {
   if (!radio.begin()){
     while (1);
@@ -62,6 +72,10 @@ void setup() {
   sei();
 }
 
+/**
+ * \brief Sensor main loop
+ * Resets WDT. If timer_flag is set, reads and sends sensor data to Master
+ */
 void loop() {
   wdt_reset();
 

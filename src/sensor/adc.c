@@ -5,7 +5,7 @@ static uint8_t adc_initialized = 0;
 
 static void adc_init(void);
 
-int8_t init_adc_line(uint8_t line, uint8_t continuous){
+int8_t init_adc_line(uint8_t line){
   if (line_availability & (1U << line) || line > 7){
     return -1;
   }
@@ -29,7 +29,7 @@ int8_t free_line(uint8_t line){
   return 0;
 }
 
-int8_t read_line(uint8_t line, double* value){
+int8_t read_line(uint8_t line, uint16_t* value){
   if (line > 7){
     return -1;
   }
@@ -41,10 +41,10 @@ int8_t read_line(uint8_t line, double* value){
 
   while (!(ADCSRA & (1U << 4)));
 
-  uint16_t raw_temp = ADCL;
-  raw_temp |= ((ADCH << 8) & 0x300U);
+  uint16_t raw_adc = ADCL;
+  raw_adc |= ((ADCH << 8) & 0x300U);
 
-  (*value) = (raw_temp * (5000 / 1024)) / 10;
+  (*value) = raw_adc;
 
   return 0;
 }
