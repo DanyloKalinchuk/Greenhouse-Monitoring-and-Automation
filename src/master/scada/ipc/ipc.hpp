@@ -22,6 +22,7 @@
 
 #define SOCKET_PATH ("/tmp/SCADA_SOCK") ///< Path to the socket
 
+/// \brief Class for handling IPC
 class IPC{
     std::thread ipc_thread;
     std::atomic<bool> ipc_on; ///< Keeps ipc_thread alive

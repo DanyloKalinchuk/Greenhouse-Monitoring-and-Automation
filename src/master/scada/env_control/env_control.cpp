@@ -79,7 +79,6 @@ std::vector<SENS_FRAME> EnvControl::get_last_records(){
     return active_sens_data;
 }
 
-/*
 void EnvControl::set_last_records(std::vector<SENS_FRAME> frames){
     std::chrono::time_point now = std::chrono::system_clock::now();
     std::lock_guard<std::mutex> last_rec_lock(this->last_rec_mtx);
@@ -88,4 +87,3 @@ void EnvControl::set_last_records(std::vector<SENS_FRAME> frames){
         this->last_records[frame.sensor_id] = {frame, std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count()};
     }
 }
-*/

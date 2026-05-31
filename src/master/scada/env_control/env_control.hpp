@@ -75,7 +75,8 @@ class EnvControl{
      */
     std::vector<SENS_FRAME> get_last_records();
 
-    //void set_last_records(std::vector<SENS_FRAME> frames);
+    /// \brief Fills last_records vector with SENS_FRAMEs
+    void set_last_records(std::vector<SENS_FRAME> frames);
 };
 
 #endif
