@@ -1,10 +1,13 @@
 #!/bin/bash
 
 git pull || exit 1
-cmake --build ./build --parallel || exit 1
+cd build
+cmake --build . --parallel || exit 1
 
-./build/scada_process &
+./scada_process &
 SCADA_PID=$!
+
+cd ..
 
 echo "SCADA process ID: $SCADA_PID"
 trap "kill $SCADA_PID" EXIT

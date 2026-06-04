@@ -1,8 +1,6 @@
 /**
  * \file
  * \brief Main file for the Sensor device
- * 
- * \todo Add CO2 and Soil Moisture sensors hadling using adc.h
  */
 
 #include <avr/io.h>
@@ -22,9 +20,13 @@ extern "C"{
 
 #define INIT_PIPE 0 ///< Pipe number for the Sensor initialization
 
-#define DHT11_PIN 4 ///< Pin number to which the DHT11 sensor is connected
+#define DHT11_PIN 4 ///< Pin to which the DHT11 sensor is connected
+#define MOIST_PIN 2 ///< Soil Moisture sensor pin
+#define CO2_PIN 3 ///< CO2 sensor pin
 #define CE 7 ///< CE line of the nRF24L01 module
 #define CS 10 ///< CS line of the nRF24L01 module
+
+#define ADC_MAX_VAL 1023
 
 #define SENSOR_DELAY 10000 ///< Delay for the sensor data sending loop
 
@@ -34,6 +36,10 @@ RF24 radio = RF24(CE, CS);
 
 DHT11 dht = DHT11(DHT11_PIN);
 DHT11_DATA dht_data;
+
+uint8_t moist_line = init_adc_line(MOIST_PIN);
+uint8_t co2_line = init_adc_line(CO2_PIN);
+uint16_t adc_raw;
 
 Timer timer(TIMER_UNITS::TIMER_MS);
 volatile uint8_t timer_flag; ///< Flag set by the Timer's ISR
@@ -85,11 +91,17 @@ void loop() {
     dht_data = dht.read();
     uint32_t data_to_send[5];
 
+    read_line(moist_line, &adc_raw);
+    uint32_t soil_moisture = (adc_raw * 100) / ADC_MAX_VAL;
+
+    read_line(co2_line, &adc_raw);
+    uint32_t co2 = (adc_raw * 100) / ADC_MAX_VAL;
+
     data_to_send[0] = (uint32_t)(ms_ids.sensor);
     data_to_send[1] = (uint32_t)(dht_data.humidity);
     data_to_send[2] = (uint32_t)(dht_data.temperature);
-    data_to_send[3] = 0;
-    data_to_send[4] = 0;
+    data_to_send[3] = soil_moisture;
+    data_to_send[4] = co2;
 
     radio.write(data_to_send, sizeof(data_to_send));
   }
