@@ -20,8 +20,6 @@ Radio_RF24::Radio_RF24() : Radio(){
         throw std::runtime_error("Failed to initialize the radio module");
     }
 
-    this->read_data_on_disk();
-
     this->radio.setPALevel(RF24_PA_LOW);
     this->radio.setDataRate(RF24_250KBPS);
     this->radio.setRetries(10, 15);

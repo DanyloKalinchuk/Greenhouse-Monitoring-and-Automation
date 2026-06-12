@@ -18,6 +18,8 @@
 
 #define DEFAULT_ID (0) ///< Default ID value for Sensors
 #define MASTER_ID (1) ///< Master ID value
+#define SENSOR_DATA_SIZE (5) ///< Number of 32-bit values received from Sensor
+
 
 /// \brief Contains data received from Sensor
 struct SENS_FRAME{
