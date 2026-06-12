@@ -33,7 +33,7 @@ class Web:
         return Web._instance
     
     def _handle_request(self):
-        from greenhouse_web_app.models import SensorData
+        from greenhouse_web_app.models import SensorData, Sensors
 
         while not self._ipc_request_event.wait(REQ_DELAY_SEC):
 
@@ -41,8 +41,17 @@ class Web:
                 sensors = self._ipc.request()
 
             for sensor in sensors:
+                sensor_reg = Sensors.objects.filter(org_id=sensor.id)
+
+                if (not sensor_reg.exists()):
+                    sensor_reg = Sensors()
+                    sensor_reg.org_id = sensor.id
+                    sensor_reg.save()
+                else:
+                    sensor_reg = sensor_reg.first()
+
                 sensor_record = SensorData()
-                sensor_record.sensor_id = sensor.id
+                sensor_record.sensor = sensor_reg
                 sensor_record.temperature = sensor.temp
                 sensor_record.humidity = sensor.hum
                 sensor_record.soil_moisture = sensor.moist

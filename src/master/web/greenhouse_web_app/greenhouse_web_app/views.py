@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from .models import SensorData
+from .models import SensorData, Sensors
 from django.db.models import Avg, Max, Min
 from django.db.models.functions import TruncDay, TruncHour
 from django.core.serializers.json import DjangoJSONEncoder
@@ -19,6 +19,11 @@ def home(request):
 
 def help(request):
     return render(request,  'help.html')
+
+def sensors(request):
+    sensors = Sensors.objects.all()
+
+    return render(request, 'sensors.html', {'sensors': sensors})
 
 def records(request):
     records = SensorData.objects.all().order_by('-date')

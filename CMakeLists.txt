@@ -6,6 +6,9 @@ file(GLOB_RECURSE SCADA_SRC CONFIGURE_DEPENDS "src/master/scada/*.cpp")
 list(FILTER SCADA_SRC EXCLUDE REGEX ".*/tests/.*")
 
 add_executable(scada_process ${SCADA_SRC})
+target_compile_definitions(scada_process PRIVATE 
+  RADIO_OPTION_RF24
+)
 target_link_libraries(scada_process rf24 pthread gpiod)
 
 include(FetchContent)

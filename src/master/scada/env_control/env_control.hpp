@@ -1,7 +1,6 @@
 #ifndef ENV_CONTROL
 #define ENV_CONTROL
 
-#include "../radio_comm/radio_comm.hpp"
 #include "actuator/actuator.hpp"
 #include <chrono>
 #include <cstdint>
@@ -12,6 +11,12 @@
 #include <vector>
 #include <utility>
 #include <memory>
+
+#ifndef RADIO_OPTION_RF24
+#include "../radio_comm/radio_ble.hpp"
+#else
+#include "../radio_comm/radio_rf24.hpp"
+#endif
 
 #define ACTIVE_TIME_LIMIT_SEC 25 ///< 2.5 data readings on the sensor side
 
@@ -25,7 +30,7 @@ enum EnvParams{
 
 /// \brief Class for managing Actuators and last SENS_FRAMEs received
 class EnvControl{
-    Radio radio;
+    std::unique_ptr<Radio> radio = nullptr;
     std::map<uint8_t, std::pair<SENS_FRAME, uint64_t>> last_records; ///< Holds last SENS_FRAME and the time when it was received for each registered Sensor
 
     std::thread comm_thread; ///< Radio communication thread

@@ -21,8 +21,14 @@ void EnvControl::change_parameter(SENS_FRAME frame){
 }
 
 EnvControl::EnvControl(std::unique_ptr<Actuator> temp_act, std::unique_ptr<Actuator> hum_act, 
-    std::unique_ptr<Actuator> moist_act, std::unique_ptr<Actuator> co2_act) : radio()
+    std::unique_ptr<Actuator> moist_act, std::unique_ptr<Actuator> co2_act)
 {
+    #ifndef RADIO_OPTION_RF24
+        this->radio = std::make_unique<Radio_BLE>();
+    #else
+        this->radio = std::make_unique<Radio_RF24>();
+    #endif
+
     this->temp_act = std::move(temp_act);
     this->hum_act = std::move(hum_act);
     this->moist_act = std::move(moist_act);
@@ -33,7 +39,7 @@ EnvControl::EnvControl(std::unique_ptr<Actuator> temp_act, std::unique_ptr<Actua
     this->comm_thread = std::thread(&EnvControl::handle_comm, this);
 }
 
-EnvControl::EnvControl() : radio(0) {
+EnvControl::EnvControl(){
     this->temp_act = std::make_unique<Actuator>(10, 10);
     this->hum_act = std::make_unique<Actuator>(10, 10);
     this->moist_act = std::make_unique<Actuator>(10, 10);

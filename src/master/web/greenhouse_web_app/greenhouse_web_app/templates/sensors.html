@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Sensors{% endblock %}
+
+{% block page_header %}Sensors{% endblock %}
+
+{% block content %}
+    <div id="senosrs_list">
+        {% if sensors %}
+            <table>
+                <tr>
+                    <th>Sensor Inner ID</th>
+                    <th>Sensor Outer ID</th>
+                </tr>
+
+                {% for sensor in sensors %}
+                    <tr>
+                        <td>{{ sensor.id }}</td>
+                        <td class="top_left_td">{{ sensor.org_id }}</td>
+                    </tr>
+                {% endfor %}
+
+            </table>
+        {% else %}
+            <h2>No senors found</h2>
+        {% endif %}
+    </div>
+{% endblock %}
