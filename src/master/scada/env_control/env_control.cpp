@@ -2,7 +2,7 @@
 
 void EnvControl::handle_comm(){
     while (this->comm_on.load()){
-        SENS_FRAME frame = this->radio.handle_communications();
+        SENS_FRAME frame = this->radio->handle_communications();
 
         if (frame.sensor_id != DEFAULT_ID){
             std::chrono::time_point now = std::chrono::system_clock::now();
@@ -23,10 +23,10 @@ void EnvControl::change_parameter(SENS_FRAME frame){
 EnvControl::EnvControl(std::unique_ptr<Actuator> temp_act, std::unique_ptr<Actuator> hum_act, 
     std::unique_ptr<Actuator> moist_act, std::unique_ptr<Actuator> co2_act)
 {
-    #ifndef RADIO_OPTION_RF24
-        this->radio = std::make_unique<Radio_BLE>();
-    #else
+    #ifdef RADIO_OPTION_RF24
         this->radio = std::make_unique<Radio_RF24>();
+    #else
+        this->radio = std::make_unique<Radio_BLE>();
     #endif
 
     this->temp_act = std::move(temp_act);

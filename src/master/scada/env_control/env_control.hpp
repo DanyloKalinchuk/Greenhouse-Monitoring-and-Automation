@@ -12,10 +12,10 @@
 #include <utility>
 #include <memory>
 
-#ifndef RADIO_OPTION_RF24
-#include "../radio_comm/radio_ble.hpp"
-#else
+#ifdef RADIO_OPTION_RF24
 #include "../radio_comm/radio_rf24.hpp"
+#else
+#include "../radio_comm/radio_ble.hpp"
 #endif
 
 #define ACTIVE_TIME_LIMIT_SEC 25 ///< 2.5 data readings on the sensor side
