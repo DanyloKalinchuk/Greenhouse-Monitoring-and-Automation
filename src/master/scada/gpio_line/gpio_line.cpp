@@ -57,6 +57,9 @@ GPIOLine::GPIOLine(uint8_t pin, bool input){
 		gpiod_chip_close(this->chip);
 		throw std::runtime_error("Failed to request the lines");
 	}
+
+	this->pfd.fd = gpiod_line_request_get_fd(this->request);
+	this->pfd.events = POLLIN;
 }
 
 GPIOLine::~GPIOLine(){
@@ -86,12 +89,15 @@ bool GPIOLine::read(){
     return line_value == 1;
 }
 
-void GPIOLine::wait_for_edge_event(){
+bool GPIOLine::wait_for_edge_event(){
 	if (this->input){
-		gpiod_line_request_wait_edge_events(this->request, -1);
+		if (!poll(&this->pfd, 1, EDGE_WAIT_TIMEOUT)){
+			return false;
+		}
 
 		struct gpiod_edge_event_buffer* buff = gpiod_edge_event_buffer_new(1);
 		gpiod_line_request_read_edge_events(this->request, buff, 1);
 		gpiod_edge_event_buffer_free(buff);
 	}
+	return true;
 }

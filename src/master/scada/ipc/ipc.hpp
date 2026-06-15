@@ -4,6 +4,7 @@
 #include "../env_control/env_control.hpp"
 #include <sys/un.h>
 #include <sys/socket.h>
+#include <sys/poll.h>
 #include <unistd.h>
 #include <chrono>
 #include <map>
@@ -17,6 +18,10 @@
 #define MSG_DISC (0) ///< Message used on client disconnect
 #define MSG_CONF (1) ///< Configuration request message
 #define MSG_REQ (2) ///< Data request message
+#define MSG_TIMEOUT (3) ///< Message used on poll timeout
+
+#define POLL_TIMEOUT (500) ///< Time time(ms) thread will wait before waking up
+#define POLLFD_SIZE (2)
 
 #define CONF_BUFF_SIZE (8) ///< Number of values to be received during configuration request
 
@@ -30,6 +35,7 @@ class IPC{
 
     int sfd, cfd;
     struct sockaddr_un addr;
+    struct pollfd fds[POLLFD_SIZE];
 
     /// \brief Opens socket if disconnected is set. Handles IPC requests
     void ipc_handling();

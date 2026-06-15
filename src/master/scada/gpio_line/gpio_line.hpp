@@ -4,11 +4,15 @@
 #include <gpiod.h>
 #include <cstdint>
 #include <stdexcept>
+#include <sys/poll.h>
+
+#define EDGE_WAIT_TIMEOUT 500
 
 /// \brief Class for managing GPIO usage 
 class GPIOLine {
     struct gpiod_chip *chip;
 	struct gpiod_line_request *request;
+    struct pollfd pfd;
 
     uint8_t pin; ///< GPIO pin handled by the class instance
     bool input; ///< Is True if the GPIO configured to the input mode, False otherwise
@@ -34,8 +38,12 @@ class GPIOLine {
     /// \brief Return logic level of the GPIO pin
     bool read();
 
-    /// \brief Blocks until a falling edge event is detected on the GPIO pin
-    void wait_for_edge_event();
+    /**
+     * \brief Blocks until a falling edge event is detected on the GPIO pin
+     * 
+     * \return True if edge event occurred, False if timeout event occured
+     */
+    bool wait_for_edge_event();
 };
 
 #endif

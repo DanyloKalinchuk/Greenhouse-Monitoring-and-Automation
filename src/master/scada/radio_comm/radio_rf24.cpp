@@ -33,8 +33,11 @@ Radio_RF24::Radio_RF24() : Radio(){
 SENS_FRAME Radio_RF24::handle_communications(){
     uint8_t curr_pipe;
     SENS_FRAME sens_frame;
+    sens_frame.sensor_id = DEFAULT_ID;
 
-    this->irq_line->wait_for_edge_event();
+    if (!this->irq_line->wait_for_edge_event()){
+        return sens_frame;
+    }
 
     bool tx_ok, tx_fail, rx_ready;
     this->radio.whatHappened(tx_ok, tx_fail, rx_ready);
@@ -56,8 +59,6 @@ SENS_FRAME Radio_RF24::handle_communications(){
         this->radio.startListening();
         this->radio.openReadingPipe(INIT_PIPE, (uint8_t*)(INIT_ADDRESS));
         this->radio.openReadingPipe(DATA_PIPE, (uint64_t)(MASTER_ID));
-
-        sens_frame.sensor_id = DEFAULT_ID;
 
     }else if (curr_pipe == DATA_PIPE){
         uint32_t sensor_data[SENSOR_DATA_SIZE];

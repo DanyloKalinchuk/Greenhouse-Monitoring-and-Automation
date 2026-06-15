@@ -3,12 +3,17 @@
 void IPC::ipc_handling(){
     while (this->ipc_on.load()){
         if (this->disconnected.load()){
+
+            int event = poll(this->fds, POLLFD_SIZE, POLL_TIMEOUT);
+            if (!event) continue;
+
             this->cfd = accept(this->sfd, NULL, NULL);
             if (this->cfd == -1){
                 close(this->sfd);
                 close(this->cfd);
                 throw std::runtime_error("Failed to accept");
             }
+            this->fds[1].fd = this->cfd;
             this->disconnected.store(false);
         }
 
@@ -23,6 +28,9 @@ void IPC::ipc_write(uint16_t msg){
 }
 
 uint16_t IPC::ipc_read(){
+    int event = poll(this->fds, POLLFD_SIZE, POLL_TIMEOUT);
+    if (!event) return MSG_TIMEOUT;
+
     uint16_t msg;
     int32_t bytes_read = recv(this->cfd, &msg, sizeof(msg), MSG_NOSIGNAL);
 
@@ -106,6 +114,12 @@ IPC::IPC() : env_control(
     }
 
     this->disconnected.store(true);
+
+    this->fds[0].fd = this->sfd;
+    this->fds[0].events = POLLIN;
+
+    this->fds[1].fd = -1;
+    this->fds[1].events = POLLIN;
 
     this->ipc_on.store(true);
     this->ipc_thread = std::thread(&IPC::ipc_handling, this);
