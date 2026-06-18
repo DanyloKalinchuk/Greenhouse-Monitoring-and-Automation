@@ -26,7 +26,7 @@ Those are connected via **Unix Socket** for sensor data exchange and configurati
 #### SCADA
 The process written in C++ that handles Master-Sensors communication and the environmental control logic.   
 Main tasks:   
--   Handles *Sensor* registration/initialization and receives data from them.
+-   Handles *Sensor* initialization and receives data from them.
 -   Sends last acquired data to the *Web process* on demand.
 -   Keeps the environmental parameters accordingly to the configuration, received from the *Web process*.
 
@@ -34,13 +34,14 @@ Main tasks:
 The process written in python with the usage of **Django** framework.   
 Main tasks:   
 -   Receives data from *SCADA process* and saves it in the *Database*.
+-   Provides *Sensors* with unique *Inner IDs* for better readability.
 -   Handles *Web-App* logic.
 -   Set configurations of environmental control logic in the *SCADA process* accordingly to the *Web-App* user input.
 
 ### Web Application (Web-App) and Database   
 *Web-App* and *Database* handling logic implemented in the *Web process* of the *Edge Device* using **Django** framework.   
 *Web-App* provides a user the access to the historical data stored in the *Database* and handles its visualisation. It also makes possible for a user to configure the environmental parameters the *SCADA process* should keep.   
-*Database* stores historical data with sensor IDs and date and time of record creation.   
+*Database* stores historical data with ***inner IDs*** and date and time of record creation. The *Sensors* *inner ID* - *sensor ID* (the one stored in *Sensor's* **EEPROM**) pairs are stored in a separate table.   
    
 ## Data Flow and Communication Logic
 
@@ -52,8 +53,8 @@ Where *Master(SCADA)* is a passive element that listens for messages from *Senso
 ### *Sensor/s* **-->** *Master(SCADA)*
 *Sensor* stores its unique *sensor ID* and *master ID* in its **EEPROM**, both values are 8-bit unsigned integers. By default the *master ID* is set to *MASTER_DEFAULT* value that expands to unsigned 0.   
 If the value of *master ID* is set to default, a *Sensor* starts its initialization by sending its *sensor ID* to *"init_address"* that is listened by *Master*.    
-*Master* checks if it already has an *inner ID* associated with the received *sensor ID* and if none, *Master* assigns one.  After that *Master* sends its own unique *ID* to the *Sensor*, which is the address the data should be sent to.   
-When receiving data, *Master* organizes it in a *SENS_FRAME* structure (defined in 'src/master/scada/radio_comm/radio_comm.hpp') with the *Sensor's* *inner ID*.   
+After that *Master* sends its own unique *ID* to the *Sensor*, which is the address the data should be sent to.   
+When receiving data, *Master* organizes it in a *SENS_FRAME* structure (defined in 'src/master/scada/radio_comm/radio_comm.hpp').   
 The received data triggers environmental handling and is stored to be sent on *Web process* demand.
    
 ### *Master(SCADA)* **-->** *Master(Web)*
@@ -66,6 +67,6 @@ There are two types of messages *Web process* can send:
    
 On a ***data request*** (received *Request message*), *SCADA process* goes through the list of last received *SENS_FRAME* structure for each sensor and gather the ***active*** ones.   
 *Sensor* is identified as ***active*** if the last *SENS_FRAME* was received during the period of 2.5 *Sensor cycles* (1 cycle equals to the value of *SENSOR_DELAY*).   
-*SCADA process* sends the number of the active sensors and then each of theirs *SENS_FRAME*.   
+*SCADA process* sends the number of the active sensors and then each of theirs *SENS_FRAME*. After receiving *SENS_FRAMEs*, *Web process* checks if each received *sensor ID* already has an *inner ID* associated with it and if none, *Web process* assigns one by adding a corresponding record in the *Sensors* table.   
    
 On a ***configuration request*** (received *Configuration message*), *SCADA process* reads 2 values for each environment parameter (*x_perf* and *x_error*) and sets corresponding values inside of *Actuator* objects.   
