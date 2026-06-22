@@ -13,12 +13,13 @@
         <form  id="search_form" action="/greenhouse/records" method="post">
             {% csrf_token %}
             <select id="form_input_options" name="form_input_options" required>
-                <option value="id">Sensor ID</option>
-                <option value="date">Date</option>
+                <option value="id" {% if filtered_by == "id"  %}selected{% endif %}>Sensor ID</option>
+                <option value="date" {% if filtered_by == "date"  %}selected{% endif %}>Date</option>
             </select>
 
-            <input type="number" name="search_input" id="search_input" required>
+            <input type={% if filtered_by == "date" %}"date"{% else %}"number"{% endif %} name="search_input" id="search_input" value={% if filtered_by_value %}{{ filtered_by_value }}{% endif %} required>
             <button class="btn" type="submit">Filter</button>
+            <button class="btn" type="submit" formaction="/greenhouse/records/csv" formmethod="post" formnovalidate>Get CSV</button>
         </form>
         <a class="btn" href="/greenhouse/records">Reset Filter</a>
         
@@ -28,7 +29,7 @@
         </div>
     </div>
 
-    {% if filtered %}
+    {% if info %}
         <h3 class="filter_info">{{ info }}</h3>
     {% endif %}
 

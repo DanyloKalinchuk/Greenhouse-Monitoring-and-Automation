@@ -24,5 +24,6 @@ urlpatterns = [
     path('greenhouse/help', views.help, name="help"),
     path('greenhouse/sensors', views.sensors, name="sensors"),
     path('greenhouse/records', views.records, name="all_records"),
+    path('greenhouse/records/csv', views.records_csv, name="records_csv"),
     path('greenhouse/config', views.config, name="config"),
 ]

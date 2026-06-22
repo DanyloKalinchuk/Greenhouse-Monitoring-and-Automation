@@ -5,6 +5,7 @@ from django.db.models import Avg, Max, Min
 from django.db.models.functions import TruncDay, TruncHour
 from django.core.serializers.json import DjangoJSONEncoder
 import json
+import csv
 
 import sys
 import os
@@ -13,6 +14,38 @@ REL_PATH = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, os.path.join(REL_PATH, "../../"))
 
 from web import Web
+    
+def records_csv(request):
+    if request.method == 'POST':
+        records = SensorData.objects.all().order_by('-date')
+        filtered_by = ""
+
+        if request.POST.get("search_input"):
+
+            if request.POST.get("form_input_options") == "id":
+                sensor_id = request.POST.get("search_input")
+                records = records.filter(sensor_id=sensor_id)
+                filtered_by = f"_sensor_id={sensor_id}"
+
+            elif request.POST.get("form_input_options") == "date":
+                date = request.POST.get("search_input")
+                records = records.filter(date__date=date)
+                filtered_by = f"_date={date}"
+
+        response = HttpResponse(
+            content_type="text/csv",
+            headers={"Content-Disposition": f'attachment; filename="records{filtered_by}.csv"'},
+        )
+
+        csv_headers = ["sensor_id", "date", "temperature", "humidity", "soil_moisture", "co2"]
+
+        writer = csv.writer(response)
+        writer.writerow(csv_headers)
+
+        for record in records:
+            writer.writerow([record.sensor_id, record.date, record.temperature, record.humidity, record.soil_moisture, record.co2])
+
+        return response
 
 def home(request):
     return render(request, 'base.html')
@@ -120,7 +153,8 @@ def records(request):
         records_chart_min_max = json.dumps(list(records_chart_min_max), cls=DjangoJSONEncoder)
             
         return render(request, 'records_base.html', {
-            'filtered': True, 
+            'filtered_by': request.POST.get("form_input_options"), 
+            'filtered_by_value': request.POST.get("search_input"),
             'records': records, 
             'info': info, 
             'chart_avg': records_chart_avg, 
