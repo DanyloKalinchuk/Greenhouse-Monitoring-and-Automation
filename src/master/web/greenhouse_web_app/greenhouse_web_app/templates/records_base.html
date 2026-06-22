@@ -17,7 +17,7 @@
                 <option value="date" {% if filtered_by == "date"  %}selected{% endif %}>Date</option>
             </select>
 
-            <input type={% if filtered_by == "date" %}"date"{% else %}"number"{% endif %} name="search_input" id="search_input" value={% if filtered_by_value %}{{ filtered_by_value }}{% endif %} required>
+            <input type={% if filtered_by == "date" %}"date"{% else %}"number"{% endif %} name="search_input" id="search_input" {% if filtered_by_value %}value={{ filtered_by_value }}{% endif %} required>
             <button class="btn" type="submit">Filter</button>
             <button class="btn" type="submit" formaction="/greenhouse/records/csv" formmethod="post" formnovalidate>Get CSV</button>
         </form>
