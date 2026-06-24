@@ -16,10 +16,10 @@ class Web:
     def __init__(self):
         self._ipc = IPC(SOCKET_PATH)
 
-        self._ipc_req_thread = threading.Thread(target=self._handle_request)
+        self._ipc_req_thread = threading.Thread(target=self._handle_request, daemon=True)
         self._ipc_req_thread.start()
 
-    def __del__(self):
+    def shutdown(self):
         self._ipc_stop_event.set()
         self._ipc_request_event.set()
         self._ipc_req_thread.join()
@@ -36,7 +36,7 @@ class Web:
     def _handle_request(self):
         from greenhouse_web_app.models import SensorData, Sensors
 
-        while not self._ipc_stop_event:
+        while not self._ipc_stop_event.is_set():
 
             self._ipc_request_event.wait(REQ_DELAY_SEC)
             self._ipc_request_event.clear()
