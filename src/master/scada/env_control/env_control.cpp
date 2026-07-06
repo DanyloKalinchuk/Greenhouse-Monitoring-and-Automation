@@ -83,7 +83,7 @@ void EnvControl::set_param(EnvParams env_param, int16_t X_perf, uint8_t X_error)
             break;
     }
 
-    log_message += ". X_perf: " + std::string(X_perf) + " X_error: " + std::string(X_error);
+    log_message += ". X_perf: " + std::to_string(X_perf) + " X_error: " + std::to_string(X_error);
     Logger::get_instance()->log_out(ENV_CTRL_LOGS, log_message, MsgType::INFO);
 }
 

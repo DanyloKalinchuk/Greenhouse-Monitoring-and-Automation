@@ -7,7 +7,7 @@ void Radio_RF24::sensor_handle_data(uint32_t sensor_data[SENSOR_DATA_SIZE], SENS
     sens_frame->co2 = sensor_data[3];
     sens_frame->soil_moisture = sensor_data[4];
 
-    std::string log_message = "Read data from sensor with ID: " + std::string(sens_frame->sensor_id);
+    std::string log_message = "Read data from sensor with ID: " + std::to_string(sens_frame->sensor_id);
     Logger::get_instance()->log_out(RADIO_LOGS_PATH, log_message, MsgType::INFO);
 }
 
