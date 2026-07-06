@@ -62,7 +62,7 @@ EnvControl::~EnvControl(){
 }
 
 void EnvControl::set_param(EnvParams env_param, int16_t X_perf, uint8_t X_error){
-    std::string log_message = "Update parameters for ";
+    std::string log_message = "Updated parameters for ";
     
     switch (env_param){
         case ENV_TEMPERATURE:

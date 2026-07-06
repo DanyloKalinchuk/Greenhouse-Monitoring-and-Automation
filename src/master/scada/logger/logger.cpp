@@ -32,17 +32,17 @@ std::string Logger::construct_message(std::string message, MsgType msg_type){
     log_msg += " | ";
     switch (msg_type){
         case MsgType::ERROR:
-            log_msg += "ERROR |";
+            log_msg += "ERROR | ";
             break;
         case MsgType::WARNING:
-            log_msg += "WARNING |";
+            log_msg += "WARNING | ";
             break;
         default:
-            log_msg += "INFO |";
+            log_msg += "INFO | ";
             break;
     }
 
-    log_msg += " | " + message + " |\n";
+    log_msg += message + " |\n";
 
     return log_msg;
 }
