@@ -2,7 +2,7 @@
 
 git pull || exit 1
 cd build
-cmake --build . --parallel || exit 1
+cmake --build . || exit 1
 
 ./scada_process &
 SCADA_PID=$!

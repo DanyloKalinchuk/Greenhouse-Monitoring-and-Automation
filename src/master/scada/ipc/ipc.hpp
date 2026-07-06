@@ -27,7 +27,10 @@
 #define CONF_BUFF_SIZE (8) ///< Number of values to be received during configuration request
 
 #define SOCKET_PATH ("/tmp/SCADA_SOCK") ///< Path to the socket
+
+#ifndef IPC_LOGS
 #define IPC_LOGS ("logs/ipc_logs.log") ///< Path to the IPC logs output file
+#endif
 
 /// \brief Class for handling IPC
 class IPC{

@@ -15,7 +15,9 @@
 #include <stdexcept>
 #include <cstdint>
 
+#ifndef DEFAULT_OUTPUT_PATH
 #define DEFAULT_OUTPUT_PATH "logs/logs.log"
+#endif
 
 /// \brief Types of logging messages
 enum MsgType {
