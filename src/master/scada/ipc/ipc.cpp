@@ -49,12 +49,16 @@ void IPC::handle_msg(){
     uint16_t msg = this->ipc_read();
 
     if (msg == MSG_CONF){
+        Logger::get_instance()->log_out(IPC_LOGS, "Recieved configuration message" ,MsgType::INFO);
+
         for (int i = 0; i < 8; i++){
             buff.push_back(this->ipc_read());
         }
 
         this->handle_configuration(buff);
     }else if (msg == MSG_REQ){
+        Logger::get_instance()->log_out(IPC_LOGS, "Recieved data request message" ,MsgType::INFO);
+
         this->handle_data_request();
     }
 }

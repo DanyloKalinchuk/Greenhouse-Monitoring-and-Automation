@@ -18,11 +18,21 @@ class Radio_RF24 : public Radio{
     std::unique_ptr<GPIOLine> irq_line;
 
     protected:
+     /**
+     * \brief Packs sensor_data array into a SENS_FRAME structure
+     * 
+     * \param[in] sensor_data Data received from a Sensor
+     * \param[out] sens_frame Pointer to a SENS_FRAME structure
+     */
     void sensor_handle_data(uint32_t sensor_data[SENSOR_DATA_SIZE], SENS_FRAME* sens_frame) override;
 
     public:
     Radio_RF24();
 
+    /**
+     * \brief Handles radio communication
+     * Initializes Sensor or receives SENS_FRAMEs
+     */
     SENS_FRAME handle_communications() override;
 };
 

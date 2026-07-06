@@ -2,6 +2,7 @@
 #define ENV_CONTROL
 
 #include "actuator/actuator.hpp"
+#include "../logger/logger.hpp"
 #include <chrono>
 #include <cstdint>
 #include <thread>
@@ -17,6 +18,8 @@
 #else
 #include "../radio_comm/radio_ble.hpp"
 #endif
+
+#define ENV_CTRL_LOGS ("logs/env_ctrl_logs.log") ///< Path to the log output file
 
 #define ACTIVE_TIME_LIMIT_SEC 25 ///< 2.5 data readings on the sensor side
 

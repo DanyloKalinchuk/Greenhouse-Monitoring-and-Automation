@@ -23,6 +23,8 @@ void EnvControl::change_parameter(SENS_FRAME frame){
 EnvControl::EnvControl(std::unique_ptr<Actuator> temp_act, std::unique_ptr<Actuator> hum_act, 
     std::unique_ptr<Actuator> moist_act, std::unique_ptr<Actuator> co2_act)
 {
+    Logger::get_instance()->log_out(ENV_CTRL_LOGS, "EnvControl starting...", MsgType::INFO);
+
     #ifdef RADIO_OPTION_RF24
         this->radio = std::make_unique<Radio_RF24>();
     #else
@@ -37,13 +39,19 @@ EnvControl::EnvControl(std::unique_ptr<Actuator> temp_act, std::unique_ptr<Actua
 
     this->comm_on.store(true);
     this->comm_thread = std::thread(&EnvControl::handle_comm, this);
+
+    Logger::get_instance()->log_out(ENV_CTRL_LOGS, "EnvControl started", MsgType::INFO);
 }
 
 EnvControl::EnvControl(){
+    Logger::get_instance()->log_out(ENV_CTRL_LOGS, "EnvControl starting...", MsgType::INFO);
+
     this->temp_act = std::make_unique<Actuator>(10, 10);
     this->hum_act = std::make_unique<Actuator>(10, 10);
     this->moist_act = std::make_unique<Actuator>(10, 10);
     this->co2_act = std::make_unique<Actuator>(10, 10);
+
+    Logger::get_instance()->log_out(ENV_CTRL_LOGS, "EnvControl started", MsgType::INFO);
 }
 
 EnvControl::~EnvControl(){
@@ -54,20 +62,29 @@ EnvControl::~EnvControl(){
 }
 
 void EnvControl::set_param(EnvParams env_param, int16_t X_perf, uint8_t X_error){
+    std::string log_message = "Update parameters for ";
+    
     switch (env_param){
         case ENV_TEMPERATURE:
             this->temp_act->set_target(X_perf, X_error);
+            log_message += "Temperature";
             break;
         case ENV_HUMIDITY:
             this->hum_act->set_target(X_perf, X_error);
+            log_message += "Humidity";
             break;
         case ENV_MOISTURE:
             this->moist_act->set_target(X_perf, X_error);
+            log_message += "Soil Moisture";
             break;
         case ENV_CO2:
             this->co2_act->set_target(X_perf, X_error);
+            log_message += "CO2";
             break;
     }
+
+    log_message += ". X_perf: " + std::string(X_perf) + " X_error: " + std::string(X_error);
+    Logger::get_instance()->log_out(ENV_CTRL_LOGS, log_message, MsgType::INFO);
 }
 
 std::vector<SENS_FRAME> EnvControl::get_last_records(){

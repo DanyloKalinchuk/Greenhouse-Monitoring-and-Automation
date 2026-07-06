@@ -6,20 +6,19 @@
 #include <memory>
 #include <stdexcept>
 
-#include "radio_logs/radio_logs.hpp"
+#include "../logger/logger.hpp"
 
 #ifndef SAVE_PATH
 #define SAVE_PATH ("reg_sensors.bin") ///< File for storing registered sensors
 #endif
 
 #ifndef RADIO_LOGS_PATH
-#define RADIO_LOGS_PATH ("radio_logs.log") ///< File for radio communication logs
+#define RADIO_LOGS_PATH ("logs/radio_logs.log") ///< File for radio communication logs
 #endif
 
 #define DEFAULT_ID (0) ///< Default ID value for Sensors
 #define MASTER_ID (1) ///< Master ID value
 #define SENSOR_DATA_SIZE (5) ///< Number of 32-bit values received from Sensor
-
 
 /// \brief Contains data received from Sensor
 struct SENS_FRAME{
@@ -36,8 +35,6 @@ struct SENS_FRAME{
  */
 class Radio{
     protected:
-    RadioLogs radio_logs = RadioLogs(RADIO_LOGS_PATH);
-
     /**
      * \brief Packs sensor_data array into a SENS_FRAME structure
      * 
@@ -47,10 +44,9 @@ class Radio{
     virtual void sensor_handle_data(uint32_t sensor_data[SENSOR_DATA_SIZE], SENS_FRAME* sens_frame) = 0;
 
     public:
-
     /**
      * \brief Handles radio communication
-     * Initializes Sensor or receives SENS_FRAMEs depending on the pipe
+     * Initializes Sensor or receives SENS_FRAMEs
      */
     virtual SENS_FRAME handle_communications() = 0;
 };

@@ -7,16 +7,19 @@ void Radio_RF24::sensor_handle_data(uint32_t sensor_data[SENSOR_DATA_SIZE], SENS
     sens_frame->co2 = sensor_data[3];
     sens_frame->soil_moisture = sensor_data[4];
 
-    this->radio_logs.log_out(sens_frame->sensor_id, SensorRead);
+    std::string log_message = "Read data from sensor with ID: " + std::string(sens_frame->sensor_id);
+    Logger::get_instance()->log_out(RADIO_LOGS_PATH, log_message, MsgType::INFO);
 }
 
 Radio_RF24::Radio_RF24() : Radio(){
-    this->radio_logs.log_out(MASTER_ID, MasterStart);
+    Logger::get_instance()->log_out("Starting Radio...", MsgType::INFO);
+    Logger::get_instance()->log_out(RADIO_LOGS_PATH, "Master started", MsgType::INFO);
+
     this->radio = RF24(CE, CS);
     this->irq_line = std::make_unique<GPIOLine>(IRQ, true);
 
     if (!this->radio.begin()){
-        this->radio_logs.log_out(MASTER_ID, MasterFail);
+        Logger::get_instance()->log_out(RADIO_LOGS_PATH, "Master failed to start", MsgType::ERROR);
         throw std::runtime_error("Failed to initialize the radio module");
     }
 
@@ -28,6 +31,8 @@ Radio_RF24::Radio_RF24() : Radio(){
     this->radio.startListening();
     this->radio.openReadingPipe(INIT_PIPE, (uint8_t*)(INIT_ADDRESS));
     this->radio.openReadingPipe(DATA_PIPE, (uint64_t)(MASTER_ID));
+
+    Logger::get_instance()->log_out("Radio started", MsgType::INFO);
 }
 
 SENS_FRAME Radio_RF24::handle_communications(){

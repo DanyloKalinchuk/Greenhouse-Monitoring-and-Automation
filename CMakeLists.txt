@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.24)
 project(MASTER)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 file(GLOB_RECURSE SCADA_SRC CONFIGURE_DEPENDS "src/master/scada/*.cpp")
 list(FILTER SCADA_SRC EXCLUDE REGEX ".*/tests/.*")
@@ -26,7 +26,6 @@ list(FILTER SCADA_TEST_SRC EXCLUDE REGEX ".*/scada.cpp*")
 enable_testing()
 add_executable(scada_tests ${SCADA_TEST_SRC})
 target_compile_definitions(scada_tests PRIVATE 
-  SAVE_PATH="test_sensors.bin"
   RADIO_LOGS_PATH="test_logs.log"
   RADIO_OPTION_RF24
 )

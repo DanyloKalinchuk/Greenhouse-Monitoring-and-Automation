@@ -2,6 +2,7 @@
 #define IPC_HPP
 
 #include "../env_control/env_control.hpp"
+#include "../logger/logger.hpp"
 #include <sys/un.h>
 #include <sys/socket.h>
 #include <sys/poll.h>
@@ -20,12 +21,13 @@
 #define MSG_REQ (2) ///< Data request message
 #define MSG_TIMEOUT (3) ///< Message used on poll timeout
 
-#define POLL_TIMEOUT (500) ///< Time time(ms) thread will wait before waking up
+#define POLL_TIMEOUT (500) ///< Time time(ms) the thread will wait before waking up
 #define POLLFD_SIZE (2)
 
 #define CONF_BUFF_SIZE (8) ///< Number of values to be received during configuration request
 
 #define SOCKET_PATH ("/tmp/SCADA_SOCK") ///< Path to the socket
+#define IPC_LOGS ("logs/ipc_logs.log") ///< Path to the IPC logs output file
 
 /// \brief Class for handling IPC
 class IPC{
@@ -37,13 +39,13 @@ class IPC{
     struct sockaddr_un addr;
     struct pollfd fds[POLLFD_SIZE];
 
-    /// \brief Opens socket if disconnected is set. Handles IPC requests
+    /// \brief Opens the socket if disconnected is set. Handles IPC requests
     void ipc_handling();
 
     /**
      * \brief Handles MSG_CONF
      * 
-     * \param params CONF_BUFF_SIZE-x values corresponding to perf and error values of Actuators
+     * \param params CONF_BUFF_SIZE values corresponding to perf and error values of Actuators
      */
     void handle_configuration(std::vector<uint16_t> params);
 
@@ -64,7 +66,7 @@ class IPC{
 
     public:
     IPC();
-    /// \brief Constructs IPC object without opening socket
+    /// \brief Constructs an IPC object without opening socket
     IPC(uint8_t dummy);
     ~IPC();
 
