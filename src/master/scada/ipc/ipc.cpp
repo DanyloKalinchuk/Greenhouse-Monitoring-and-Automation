@@ -17,7 +17,7 @@ void IPC::ipc_handling(){
             this->fds[1].fd = this->cfd;
             this->disconnected.store(false);
 
-            Logger::get_instance()->log_out(IPC_LOGS, "Connected");
+            Logger::get_instance()->log_out(IPC_LOGS, "Connected", MsgType::INFO);
         }
 
         this->handle_msg();
