@@ -3,6 +3,7 @@
 void IPC::ipc_handling(){
     while (this->ipc_on.load()){
         if (this->disconnected.load()){
+            Logger::get_instance()->log_out(IPC_LOGS, "Listening ...", MsgType::INFO);
 
             int event = poll(this->fds, POLLFD_SIZE, POLL_TIMEOUT);
             if (!event) continue;
@@ -15,6 +16,8 @@ void IPC::ipc_handling(){
             }
             this->fds[1].fd = this->cfd;
             this->disconnected.store(false);
+
+            Logger::get_instance()->log_out(IPC_LOGS, "Connected");
         }
 
         this->handle_msg();
@@ -23,6 +26,8 @@ void IPC::ipc_handling(){
 
 void IPC::ipc_write(uint16_t msg){
     if (write(this->cfd, &msg, sizeof(msg)) < sizeof(msg)){
+        Logger::get_instance()->log_out(IPC_LOGS, "ipc_write() failed", MsgType::ERROR);
+
         throw std::runtime_error("Failed to SEND IPC message");
     }
 }
@@ -35,10 +40,14 @@ uint16_t IPC::ipc_read(){
     int32_t bytes_read = recv(this->cfd, &msg, sizeof(msg), MSG_NOSIGNAL);
 
     if (bytes_read == 0){
+        Logger::get_instance()->log_out(IPC_LOGS, "Disconnected", MsgType::WARNING);
+
         this->disconnected.store(true);
         msg = MSG_DISC;
     }else if (bytes_read < 0){
-        throw std::runtime_error("Failed to SEND IPC message");
+        Logger::get_instance()->log_out(IPC_LOGS, "ipc_read() failed", MsgType::ERROR);
+
+        throw std::runtime_error("Failed to READ IPC message");
     }
 
     return msg;
@@ -49,7 +58,7 @@ void IPC::handle_msg(){
     uint16_t msg = this->ipc_read();
 
     if (msg == MSG_CONF){
-        Logger::get_instance()->log_out(IPC_LOGS, "Received configuration message" ,MsgType::INFO);
+        Logger::get_instance()->log_out(IPC_LOGS, "Received configuration message", MsgType::INFO);
 
         for (int i = 0; i < 8; i++){
             buff.push_back(this->ipc_read());
@@ -57,7 +66,7 @@ void IPC::handle_msg(){
 
         this->handle_configuration(buff);
     }else if (msg == MSG_REQ){
-        Logger::get_instance()->log_out(IPC_LOGS, "Received data request message" ,MsgType::INFO);
+        Logger::get_instance()->log_out(IPC_LOGS, "Received data request message", MsgType::INFO);
 
         this->handle_data_request();
     }

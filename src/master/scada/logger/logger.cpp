@@ -28,6 +28,7 @@ std::string Logger::construct_message(std::string message, MsgType msg_type){
     time_t timestamp = std::time(NULL);
     struct tm datetime = *localtime(&timestamp);
     std::string log_msg = asctime(&datetime);
+    log_msg.pop_back();
 
     log_msg += " | ";
     switch (msg_type){

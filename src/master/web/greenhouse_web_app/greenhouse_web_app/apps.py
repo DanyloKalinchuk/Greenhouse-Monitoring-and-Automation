@@ -12,4 +12,5 @@ class GreenhouseWebAppConfig(AppConfig):
     name = "greenhouse_web_app"
 
     def ready(self):
-        Web.get_instance()
+        if os.environ.get('RUN_MAIN'):
+            Web.get_instance()

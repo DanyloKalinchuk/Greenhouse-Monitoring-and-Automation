@@ -12,8 +12,7 @@ void Radio_RF24::sensor_handle_data(uint32_t sensor_data[SENSOR_DATA_SIZE], SENS
 }
 
 Radio_RF24::Radio_RF24() : Radio(){
-    Logger::get_instance()->log_out("Starting Radio...", MsgType::INFO);
-    Logger::get_instance()->log_out(RADIO_LOGS_PATH, "Master started", MsgType::INFO);
+    Logger::get_instance()->log_out(RADIO_LOGS_PATH, "Master starting...", MsgType::INFO);
 
     this->radio = RF24(CE, CS);
     this->irq_line = std::make_unique<GPIOLine>(IRQ, true);
@@ -32,7 +31,7 @@ Radio_RF24::Radio_RF24() : Radio(){
     this->radio.openReadingPipe(INIT_PIPE, (uint8_t*)(INIT_ADDRESS));
     this->radio.openReadingPipe(DATA_PIPE, (uint64_t)(MASTER_ID));
 
-    Logger::get_instance()->log_out("Radio started", MsgType::INFO);
+    Logger::get_instance()->log_out(RADIO_LOGS_PATH, "Master started successfully", MsgType::INFO);
 }
 
 SENS_FRAME Radio_RF24::handle_communications(){
@@ -52,6 +51,9 @@ SENS_FRAME Radio_RF24::handle_communications(){
         const uint8_t master_id = MASTER_ID;
         uint8_t sensor_id;
         this->radio.read(&sensor_id, sizeof(sensor_id));
+
+        std::string log_messsage = "Received initialization request from sensor with ID: " + std::to_string(sensor_id);
+        Logger::get_instance()->log_out(RADIO_LOGS_PATH, log_messsage, MsgType::INFO);
 
         this->radio.stopListening();
         this->radio.openWritingPipe((uint64_t)(sensor_id));

@@ -32,6 +32,7 @@ struct LogQObj{
     std::string message; ///< Log message
 };
 
+/// \brief Class for logging out messages
 class Logger{
     static Logger* instance_;
 
