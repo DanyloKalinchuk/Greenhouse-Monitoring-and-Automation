@@ -8,7 +8,7 @@
 
 #include "../logger/logger.hpp"
 
-#define RADIO_LOGS_PATH ("logs/radio_logs.log") ///< File for radio communication logs
+#define RADIO_LOGS_PATH ("radio_logs.log") ///< File for radio communication logs
 
 #define DEFAULT_ID (0) ///< Default ID value for Sensors
 #define MASTER_ID (1) ///< Master ID value
