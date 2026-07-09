@@ -28,10 +28,7 @@ list(FILTER SCADA_TEST_SRC EXCLUDE REGEX ".*/scada.cpp*")
 enable_testing()
 add_executable(scada_tests ${SCADA_TEST_SRC})
 target_compile_definitions(scada_tests PRIVATE 
-  DEFAULT_OUTPUT_PATH="logs/test/logs.log"
-  RADIO_LOGS_PATH="logs/test/radio_logs.log"
-  ENV_CTRL_LOGS="logs/test/env_ctrl_logs.log"
-  IPC_LOGS="logs/test/ipc_logs.log"
+  LOGS_BASE_DIR="logs/test/"
   RADIO_OPTION_RF24
 )
 target_link_libraries(scada_tests gtest rf24 pthread gpiod)

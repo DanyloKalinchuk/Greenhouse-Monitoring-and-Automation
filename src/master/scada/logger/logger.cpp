@@ -17,7 +17,7 @@ void Logger::open_output(std::string path){
         return;
     }
 
-    this->output_files[path] = std::fstream(path, std::ios::out | std::ios::app);
+    this->output_files[path] = std::fstream((LOGS_BASE_DIR + path), std::ios::out | std::ios::app);
 
     if (!this->output_files[path].is_open()){
         throw std::runtime_error("Failed to open a logging file; Path: " + path);
@@ -49,6 +49,8 @@ std::string Logger::construct_message(std::string message, MsgType msg_type){
 }
 
 void Logger::write_message(struct LogQObj queue_object){
+    std::string message = this->construct_message(queue_object.message, queue_object.msg_type);
+
     std::lock_guard<std::mutex> output_lock(this->output_files_mtx);
 
     this->output_files[queue_object.path] << queue_object.message;
@@ -99,7 +101,8 @@ Logger::~Logger(){
 void Logger::log_out(std::string message, MsgType msg_type){
     struct LogQObj queue_object = {
         .path = DEFAULT_OUTPUT_PATH,
-        .message = this->construct_message(message, msg_type)
+        .message = message,
+        .msg_type = msg_type
     };
 
     std::lock_guard<std::mutex> queue_lock(this->queue_mtx);
@@ -118,7 +121,8 @@ void Logger::log_out(std::string path, std::string message, MsgType msg_type){
 
     struct LogQObj queue_object = {
         .path = path,
-        .message = this->construct_message(message, msg_type)
+        .message = message,
+        .msg_type = msg_type
     };
 
     std::lock_guard<std::mutex> queue_lock(this->queue_mtx);

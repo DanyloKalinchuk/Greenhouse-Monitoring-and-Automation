@@ -19,9 +19,7 @@
 #include "../radio_comm/radio_ble.hpp"
 #endif
 
-#ifndef ENV_CTRL_LOGS
 #define ENV_CTRL_LOGS ("logs/env_ctrl_logs.log") ///< Path to the log output file
-#endif
 
 #define ACTIVE_TIME_LIMIT_SEC 25 ///< 2.5 data readings on the sensor side
 

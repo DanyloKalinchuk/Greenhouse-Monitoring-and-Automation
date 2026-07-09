@@ -28,9 +28,7 @@
 
 #define SOCKET_PATH ("/tmp/SCADA_SOCK") ///< Path to the socket
 
-#ifndef IPC_LOGS
 #define IPC_LOGS ("logs/ipc_logs.log") ///< Path to the IPC logs output file
-#endif
 
 /// \brief Class for handling IPC
 class IPC{

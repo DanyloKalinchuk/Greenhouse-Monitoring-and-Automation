@@ -15,9 +15,11 @@
 #include <stdexcept>
 #include <cstdint>
 
-#ifndef DEFAULT_OUTPUT_PATH
-#define DEFAULT_OUTPUT_PATH "logs/logs.log"
+#ifndef LOGS_BASE_DIR
+#define LOGS_BASE_DIR "logs/"
 #endif
+
+#define DEFAULT_OUTPUT_PATH "logs.log"
 
 /// \brief Types of logging messages
 enum MsgType {
@@ -30,6 +32,7 @@ enum MsgType {
 struct LogQObj{
     std::string path; ///< Path to the output file
     std::string message; ///< Log message
+    MsgType msg_type; ///< Message type
 };
 
 /// \brief Class for logging out messages

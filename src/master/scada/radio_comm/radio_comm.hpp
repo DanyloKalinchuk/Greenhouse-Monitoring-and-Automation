@@ -8,13 +8,7 @@
 
 #include "../logger/logger.hpp"
 
-#ifndef SAVE_PATH
-#define SAVE_PATH ("reg_sensors.bin") ///< File for storing registered sensors
-#endif
-
-#ifndef RADIO_LOGS_PATH
 #define RADIO_LOGS_PATH ("logs/radio_logs.log") ///< File for radio communication logs
-#endif
 
 #define DEFAULT_ID (0) ///< Default ID value for Sensors
 #define MASTER_ID (1) ///< Master ID value
