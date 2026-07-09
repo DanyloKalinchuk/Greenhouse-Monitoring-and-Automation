@@ -20,7 +20,7 @@ void Logger::open_output(std::string path){
     this->output_files[path] = std::fstream((LOGS_BASE_DIR + path), std::ios::out | std::ios::app);
 
     if (!this->output_files[path].is_open()){
-        throw std::runtime_error("Failed to open a logging file; Path: " + path);
+        throw std::runtime_error("Failed to open a logging file; Path: " + (LOGS_BASE_DIR + path));
     }
 }
 
@@ -53,7 +53,7 @@ void Logger::write_message(struct LogQObj queue_object){
 
     std::lock_guard<std::mutex> output_lock(this->output_files_mtx);
 
-    this->output_files[queue_object.path] << queue_object.message;
+    this->output_files[queue_object.path] << message;
     this->output_files[queue_object.path].flush();
 }
 
