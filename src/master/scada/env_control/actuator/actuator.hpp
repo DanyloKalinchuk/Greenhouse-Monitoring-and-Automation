@@ -1,7 +1,8 @@
 #ifndef ACTUATOR_HPP
 #define ACTUATOR_HPP
 
-#include "../../gpio_line/gpio_line.hpp"
+#include "../../line/line.hpp"
+#include "../../logger/logger.hpp"
 #include <string>
 #include <stdexcept>
 #include <cstdint>
@@ -15,10 +16,10 @@
  * \todo Implementing actual children classes for each type of actuators
  */
 class Actuator {
-    std::unique_ptr<GPIOLine> pin = nullptr;
+    protected:
+    std::unique_ptr<Line> line = nullptr;
     const bool line_initialized; ///< True if the GPIO pin was acquired, False for hardware-less instances
 
-    protected:
     int16_t perf; ///< The perfect value of the environment parameter
     uint8_t error; ///< The difference between the upper and lower limit of the parameter and the corresponding perf value.
 
@@ -30,7 +31,7 @@ class Actuator {
      * \param init_perf Initial perfect value of the environment parameter
      * \param init_error Initial difference between the upper and lower limit of the parameter and the corresponding perf value.
      */
-    Actuator(uint8_t pin, int16_t init_perf, uint8_t init_error);
+    Actuator(std::unique_ptr<Line> line, int16_t init_perf, uint8_t init_error);
 
     /**
      * \brief Hardware-less Actuator constructor

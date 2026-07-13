@@ -8,17 +8,23 @@ void EnvControl::handle_comm(){
             std::chrono::time_point now = std::chrono::system_clock::now();
             std::lock_guard<std::mutex> last_rec_lock(this->last_rec_mtx);
             this->last_records[frame.sensor_id] = {frame, std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count()};
-            this->change_parameter(frame);
+            this->actuator_manager->update_parameters(frame);
         } 
     }
 }
 
+/*
 void EnvControl::change_parameter(SENS_FRAME frame){
+    Logger::get_instance()->log_out(ENV_CTRL_LOGS, "Handling parameters changes...", MsgType::INFO);
+
     this->temp_act->handle_changes(frame.temperature);
     this->hum_act->handle_changes(frame.humidity);
     this->moist_act->handle_changes(frame.soil_moisture);
     this->co2_act->handle_changes(frame.co2);
+
+    Logger::get_instance()->log_out(ENV_CTRL_LOGS, "Finished handling changes", MsgType::INFO);
 }
+*/
 
 EnvControl::EnvControl(std::unique_ptr<Actuator> temp_act, std::unique_ptr<Actuator> hum_act, 
     std::unique_ptr<Actuator> moist_act, std::unique_ptr<Actuator> co2_act)
@@ -31,10 +37,10 @@ EnvControl::EnvControl(std::unique_ptr<Actuator> temp_act, std::unique_ptr<Actua
         this->radio = std::make_unique<Radio_BLE>();
     #endif
 
-    this->temp_act = std::move(temp_act);
-    this->hum_act = std::move(hum_act);
-    this->moist_act = std::move(moist_act);
-    this->co2_act = std::move(co2_act);
+    this->actuator_manager = std::make_unique<ActuatorManager>(
+        std::move(temp_act), std::move(hum_act),
+        std::move(moist_act), std::move(co2_act)
+    );
     
 
     this->comm_on.store(true);
@@ -46,10 +52,12 @@ EnvControl::EnvControl(std::unique_ptr<Actuator> temp_act, std::unique_ptr<Actua
 EnvControl::EnvControl(){
     Logger::get_instance()->log_out(ENV_CTRL_LOGS, "EnvControl starting...", MsgType::INFO);
 
-    this->temp_act = std::make_unique<Actuator>(10, 10);
-    this->hum_act = std::make_unique<Actuator>(10, 10);
-    this->moist_act = std::make_unique<Actuator>(10, 10);
-    this->co2_act = std::make_unique<Actuator>(10, 10);
+    this->actuator_manager = std::make_unique<ActuatorManager>(
+        std::make_unique<Actuator>(10, 10),
+        std::make_unique<Actuator>(10, 10),
+        std::make_unique<Actuator>(10, 10),
+        std::make_unique<Actuator>(10, 10)
+    );
 
     Logger::get_instance()->log_out(ENV_CTRL_LOGS, "EnvControl started", MsgType::INFO);
 }
@@ -61,30 +69,8 @@ EnvControl::~EnvControl(){
     }
 }
 
-void EnvControl::set_param(EnvParams env_param, int16_t X_perf, uint8_t X_error){
-    std::string log_message = "Updated parameters for ";
-    
-    switch (env_param){
-        case ENV_TEMPERATURE:
-            this->temp_act->set_target(X_perf, X_error);
-            log_message += "Temperature";
-            break;
-        case ENV_HUMIDITY:
-            this->hum_act->set_target(X_perf, X_error);
-            log_message += "Humidity";
-            break;
-        case ENV_MOISTURE:
-            this->moist_act->set_target(X_perf, X_error);
-            log_message += "Soil Moisture";
-            break;
-        case ENV_CO2:
-            this->co2_act->set_target(X_perf, X_error);
-            log_message += "CO2";
-            break;
-    }
-
-    log_message += ". X_perf: " + std::to_string(X_perf) + " X_error: " + std::to_string(X_error);
-    Logger::get_instance()->log_out(ENV_CTRL_LOGS, log_message, MsgType::INFO);
+void EnvControl::set_params(std::vector<uint16_t> params){
+    this->actuator_manager->update_configs(params);
 }
 
 std::vector<SENS_FRAME> EnvControl::get_last_records(){

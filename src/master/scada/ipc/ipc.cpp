@@ -73,10 +73,8 @@ void IPC::handle_msg(){
 }
 
 void IPC::handle_configuration(std::vector<uint16_t> params){
-    this->env_control.set_param(ENV_TEMPERATURE, params[0], params[1]);
-    this->env_control.set_param(ENV_HUMIDITY, params[2], params[3]);
-    this->env_control.set_param(ENV_MOISTURE, params[4], params[5]);
-    this->env_control.set_param(ENV_CO2, params[6], params[7]);
+    std::thread config_update([this, params] {this->env_control.set_params(params);});
+    config_update.detach();
 }
 
 void IPC::handle_data_request(){
@@ -100,7 +98,7 @@ void IPC::handle_data_request(){
 }
 
 IPC::IPC() : env_control(
-    std::make_unique<Actuator>(10, 10),
+    std::make_unique<ActuatorServo>(std::make_unique<PWMLine>(PWM0, PERIOD, POS_INIT), 20, 5),
     std::make_unique<Actuator>(10, 10),
     std::make_unique<Actuator>(10, 10),
     std::make_unique<Actuator>(10, 10)

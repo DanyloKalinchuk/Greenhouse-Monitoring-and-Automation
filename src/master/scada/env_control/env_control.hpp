@@ -1,7 +1,7 @@
 #ifndef ENV_CONTROL
 #define ENV_CONTROL
 
-#include "actuator/actuator.hpp"
+#include "actuator_manager/actuator_manager.hpp"
 #include "../logger/logger.hpp"
 #include <chrono>
 #include <cstdint>
@@ -23,29 +23,18 @@
 
 #define ACTIVE_TIME_LIMIT_SEC 25 ///< 2.5 data readings on the sensor side
 
-/// \brief Environmental parameters 
-enum EnvParams{
-    ENV_TEMPERATURE,
-    ENV_HUMIDITY,
-    ENV_MOISTURE,
-    ENV_CO2
-};
-
 /// \brief Class for managing Actuators and last SENS_FRAMEs received
 class EnvControl{
     std::unique_ptr<Radio> radio = nullptr;
     std::map<uint8_t, std::pair<SENS_FRAME, uint64_t>> last_records; ///< Holds last SENS_FRAME and the time when it was received for each registered Sensor
+
+    std::unique_ptr<ActuatorManager> actuator_manager = nullptr;
 
     std::thread comm_thread; ///< Radio communication thread
     std::mutex last_rec_mtx; ///< Mutex for last_records
 
     protected:
     std::atomic<bool> comm_on; ///< Keeps comm_thread alive
-
-    std::unique_ptr<Actuator> temp_act;
-    std::unique_ptr<Actuator> hum_act;
-    std::unique_ptr<Actuator> moist_act;
-    std::unique_ptr<Actuator> co2_act;
 
     /**
      * \brief Calls handle_changes routine of Actuators, passing corresponding values for each
@@ -73,7 +62,7 @@ class EnvControl{
     * \param X_perf The perfect value of the environment parameter.
     * \param X_error The difference between the upper and lower limit of the parameter and the corresponding X_perf value.
     */
-    void set_param(EnvParams env_param, int16_t X_perf, uint8_t X_error);
+    void set_params(std::vector<uint16_t> params);
     
     /**
      * \brief Looks for SENS_FRAMEs from active Sensors

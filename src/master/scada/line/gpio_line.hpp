@@ -1,6 +1,7 @@
 #ifndef GPIO_LINE_HPP
 #define GPIO_LINE_HPP
 
+#include "line.hpp"
 #include <gpiod.h>
 #include <cstdint>
 #include <stdexcept>
@@ -8,8 +9,11 @@
 
 #define EDGE_WAIT_TIMEOUT 500
 
+#define PIN_HIGH 1
+#define PIN_LOW 0
+
 /// \brief Class for managing GPIO usage 
-class GPIOLine {
+class GPIOLine : public Line {
     struct gpiod_chip *chip;
 	struct gpiod_line_request *request;
     struct pollfd pfd;
@@ -31,9 +35,9 @@ class GPIOLine {
      * \brief Set GPIO pin logic level
      * \attention Only applicable for output mode
      * 
-     * \param level Represents High logic level if True, Low otherwise
+     * \param value Represents Low logic level if 0, High otherwise
      */
-    void write(bool level);
+    void write(uint32_t value);
 
     /// \brief Return logic level of the GPIO pin
     bool read();

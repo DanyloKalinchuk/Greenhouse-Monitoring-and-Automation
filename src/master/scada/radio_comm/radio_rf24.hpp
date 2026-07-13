@@ -3,7 +3,7 @@
 
 #include <RF24/RF24.h>
 #include "radio_comm.hpp"
-#include "../gpio_line/gpio_line.hpp"
+#include "../line/gpio_line.hpp"
 
 #define INIT_ADDRESS ("init_address") ///< Address for Sensor initialization. Must be identical to the init_address in \ref sensor.ino
 #define INIT_PIPE (0) ///< Pipe number for the Sensor initialization

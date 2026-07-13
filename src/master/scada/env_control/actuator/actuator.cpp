@@ -2,8 +2,8 @@
 
 void Actuator::handle_changes(int16_t param_value) {}
 
-Actuator::Actuator(uint8_t pin, int16_t init_perf, uint8_t init_error) : line_initialized(true){
-    this->pin = std::make_unique<GPIOLine>(pin, false);
+Actuator::Actuator(std::unique_ptr<Line> line, int16_t init_perf, uint8_t init_error) : line_initialized(true){
+    this->line = std::move(line);
 	this->perf = init_perf;
 	this->error = init_error;
 }

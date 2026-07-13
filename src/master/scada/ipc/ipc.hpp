@@ -2,6 +2,8 @@
 #define IPC_HPP
 
 #include "../env_control/env_control.hpp"
+#include "../env_control/actuator/actuator_servo.hpp"
+#include "../line/pwm_line.hpp"
 #include "../logger/logger.hpp"
 #include <sys/un.h>
 #include <sys/socket.h>
