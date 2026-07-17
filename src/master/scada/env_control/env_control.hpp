@@ -36,13 +36,6 @@ class EnvControl{
     protected:
     std::atomic<bool> comm_on; ///< Keeps comm_thread alive
 
-    /**
-     * \brief Calls handle_changes routine of Actuators, passing corresponding values for each
-     * 
-     * \param frame SENS_FRAME structure containing the last received environmental parameter values
-     */
-    void change_parameter(SENS_FRAME frame);
-
     /// \brief Calls Radio::handle_communications() and handles received SENS_FRAMEs
     virtual void handle_comm();
 

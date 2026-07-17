@@ -18,31 +18,38 @@ enum EnvParams{
     ENV_CO2
 };
 
+/// \brief Class for managing Actuators
 class ActuatorManager{
-    std::thread manager_thread;
-    std::atomic<bool> manager_on;
-    std::mutex manager_mtx;
-    std::condition_variable cv;
-    std::atomic<bool> changes_occured = false;
+    std::thread manager_thread; ///< Main ActuatorManager thread
+    std::atomic<bool> manager_on; ///< Keeps manager_thread alive
+    std::mutex manager_mtx; ///< Used with the cv
+    std::condition_variable cv; ///< Conditional variable for manager_thread
+    std::atomic<bool> changes_occured = false; ///< Prevents spurious awakenings
 
-    std::unique_ptr<Actuator> temp_act;
-    std::atomic<uint32_t> temp;
+    std::unique_ptr<Actuator> temp_act; ///< Actuator that regulates Temperature
+    std::atomic<uint32_t> temp; ///< Last received Temperature value
 
-    std::unique_ptr<Actuator> hum_act;
-    std::atomic<uint32_t> humidity;
+    std::unique_ptr<Actuator> hum_act; ///< Actuator that regulates Humidity
+    std::atomic<uint32_t> humidity; ///< Last received Humidity value
 
-    std::unique_ptr<Actuator> soil_moist_act;
-    std::atomic<uint32_t> soil_moist;
+    std::unique_ptr<Actuator> soil_moist_act; ///< Actuator that regulates Soil Moisture
+    std::atomic<uint32_t> soil_moist; ///< Last received Soil Moisture value
 
-    std::unique_ptr<Actuator> co2_act;
-    std::atomic<uint32_t> co2;
+    std::unique_ptr<Actuator> co2_act; ///< Actuator that regulates CO2
+    std::atomic<uint32_t> co2; ///< Last received CO2 value
 
-    std::mutex config_mtx;
+    std::mutex config_mtx; ///< Prevents concurrent access to actuators perf and error values
 
+    /**
+     * \brief Converts vector of perf and error values for actuators into a string message
+     */
     static std::string config_to_string(std::vector<uint16_t>& params);
 
     protected:
+    /// \brief Passes received data to the corresponding actuator
     void handle_actuator(EnvParams env_param);
+
+    /// \brief ActuatoManager main loop
     void handle_changes();
 
     public:
@@ -55,7 +62,18 @@ class ActuatorManager{
 
     ~ActuatorManager();
 
+    /**
+     * \brief Updates parameter values and sets conditional variable
+     * 
+     * \param frame SENS_FRAME received from Sensor
+     */
     void update_parameters(SENS_FRAME frame);
+
+    /**
+     * \brief Updates perf and error values for each actuator
+     * 
+     * \param params Vector of perf and error values received from the Web process
+     */
     void update_configs(std::vector<uint16_t>& params);
 };
 

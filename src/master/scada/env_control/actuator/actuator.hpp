@@ -8,12 +8,8 @@
 #include <cstdint>
 #include <memory>
 
-#define gpiod_val(val) ((val) == 0 ? GPIOD_LINE_VALUE_INACTIVE : GPIOD_LINE_VALUE_ACTIVE) ///< Returns gpiod Low line state if '0' provided, High state otherwise
-
 /**
  * \brief Class for managing actuators for environmental parameters control
- * 
- * \todo Implementing actual children classes for each type of actuators
  */
 class Actuator {
     protected:
@@ -27,7 +23,7 @@ class Actuator {
     /**
      * \brief Main constructor for the Actuator class
      * 
-     * \param pin GPIO pin connected to the actuator
+     * \param line Line object representing a GPIO pin
      * \param init_perf Initial perfect value of the environment parameter
      * \param init_error Initial difference between the upper and lower limit of the parameter and the corresponding perf value.
      */

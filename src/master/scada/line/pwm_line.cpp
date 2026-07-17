@@ -5,8 +5,8 @@ void PWMLine::set_value(std::fstream* file, uint32_t value){
     file->flush();
 }
 
-PWMLine::PWMLine(uint8_t module_num, uint32_t period, uint32_t duty_cycle) : Line(){
-    if (module_num > 1){
+PWMLine::PWMLine(uint8_t channel_num, uint32_t period, uint32_t duty_cycle) : Line(){
+    if (channel_num > 1){
         throw std::runtime_error("Invalid pwm module");
     }
     
@@ -17,11 +17,11 @@ PWMLine::PWMLine(uint8_t module_num, uint32_t period, uint32_t duty_cycle) : Lin
         throw std::runtime_error("Failed to open " + ((path + "export")));
     }
     
-    this->set_value(&chip_export, module_num);
+    this->set_value(&chip_export, channel_num);
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
     chip_export.close();
 
-    path += "pwm" + std::to_string(module_num) + "/";
+    path += "pwm" + std::to_string(channel_num) + "/";
     std::fstream period_file = std::fstream((path + "period"), std::ios::out);
     if (!period_file.is_open()){
         throw std::runtime_error("Failed to open " + path + "period");

@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include <mutex>
 #include <vector>
+#include <memory>
 #include <chrono>
 #include "../../env_control/env_control.hpp"
 #include "../../env_control/actuator/actuator.hpp"
@@ -18,33 +19,33 @@
 #define CO2_ERR 15
 
 class ActuatorTest : public Actuator{
-    int16_t curr_value;
+    std::shared_ptr<int16_t> curr_value;
     std::mutex act_mtx;
 
     public:
-    ActuatorTest(int16_t init_perf, uint8_t init_error) : 
+    ActuatorTest(int16_t init_perf, uint8_t init_error, std::shared_ptr<int16_t> init_curr) : 
         Actuator(init_perf, init_error) {
-            this->curr_value = init_perf;
+            this->curr_value = std::shared_ptr(init_curr);
         }
 
     void handle_changes(int16_t param_value) override {
         std::lock_guard<std::mutex> lock_act(this->act_mtx);
 
-        if (this->curr_value <= this->perf - this->error){
-            this->curr_value += this->error / 2;
-        }else if (this->curr_value >= this->perf + this->error){
-            this->curr_value -= this->error / 2;
+        if (*this->curr_value <= this->perf - this->error){
+            *this->curr_value += this->error / 2;
+        }else if (*this->curr_value >= this->perf + this->error){
+            *this->curr_value -= this->error / 2;
         }
     }
 
     void set_curr_value(int16_t curr_value){
         std::lock_guard<std::mutex> lock_act(this->act_mtx);
-        this->curr_value = curr_value;
+        *this->curr_value = curr_value;
     }
 
     int16_t get_curr_value(){
         std::lock_guard<std::mutex> lock_act(this->act_mtx);
-        return this->curr_value;
+        return *this->curr_value;
     }
 };
 
@@ -52,35 +53,29 @@ class EnvControlTest : public EnvControl{
     SENS_FRAME input_frame;
     std::mutex frame_mtx;
 
+    std::shared_ptr<int16_t> temp_curr = std::make_shared<int16_t>(TEMP_PERF);
+    std::shared_ptr<int16_t> hum_curr = std::make_shared<int16_t>(HUM_PERF);
+    std::shared_ptr<int16_t> moist_curr = std::make_shared<int16_t>(MOIST_PERF);
+    std::shared_ptr<int16_t> co2_curr = std::make_shared<int16_t>(CO2_PERF);
+
     public:
     EnvControlTest() :
         EnvControl(
-            std::make_unique<ActuatorTest>(TEMP_PERF, TEMP_ERR), 
-            std::make_unique<ActuatorTest>(HUM_PERF, HUM_ERR), 
-            std::make_unique<ActuatorTest>(MOIST_PERF, MOIST_ERR),
-            std::make_unique<ActuatorTest>(CO2_PERF, CO2_ERR)
+            std::make_unique<ActuatorTest>(TEMP_PERF, TEMP_ERR, temp_curr), 
+            std::make_unique<ActuatorTest>(HUM_PERF, HUM_ERR, hum_curr), 
+            std::make_unique<ActuatorTest>(MOIST_PERF, MOIST_ERR, moist_curr),
+            std::make_unique<ActuatorTest>(CO2_PERF, CO2_ERR, co2_curr)
         ) {}
 
     void handle_comm() override {
         while (this->comm_on.load()){
-            this->frame_mtx.lock();
+            std::lock_guard<std::mutex> lock_frame(this->frame_mtx);
             SENS_FRAME frame = this->input_frame;
-            this->frame_mtx.unlock();
 
             if (frame.sensor_id != DEFAULT_ID){
-                static_cast<ActuatorTest*>(this->temp_act.get())->set_curr_value(frame.temperature);
-                static_cast<ActuatorTest*>(this->hum_act.get())->set_curr_value(frame.humidity);
-                static_cast<ActuatorTest*>(this->moist_act.get())->set_curr_value(frame.soil_moisture);
-                static_cast<ActuatorTest*>(this->co2_act.get())->set_curr_value(frame.co2);
+                this->actuator_manager->update_parameters(frame);
 
-                this->temp_act->handle_changes(1);
-                this->hum_act->handle_changes(1);
-                this->moist_act->handle_changes(1);
-                this->co2_act->handle_changes(1);
-
-                this->frame_mtx.lock();
                 this->input_frame.sensor_id = DEFAULT_ID;
-                this->frame_mtx.unlock();
             } 
         }
     }
@@ -88,10 +83,10 @@ class EnvControlTest : public EnvControl{
     std::vector<int16_t> get_curr_values(){
         std::vector<int16_t> curr_values(4);
 
-        curr_values[0] = static_cast<ActuatorTest*>(this->temp_act.get())->get_curr_value();
-        curr_values[1] = static_cast<ActuatorTest*>(this->hum_act.get())->get_curr_value();
-        curr_values[2] = static_cast<ActuatorTest*>(this->moist_act.get())->get_curr_value();
-        curr_values[3] = static_cast<ActuatorTest*>(this->co2_act.get())->get_curr_value();
+        curr_values[0] = *this->temp_curr;
+        curr_values[1] = *this->hum_curr;
+        curr_values[2] = *this->moist_curr;
+        curr_values[3] = *this->co2_curr;
 
         return curr_values;
     }

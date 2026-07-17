@@ -13,19 +13,6 @@ void EnvControl::handle_comm(){
     }
 }
 
-/*
-void EnvControl::change_parameter(SENS_FRAME frame){
-    Logger::get_instance()->log_out(ENV_CTRL_LOGS, "Handling parameters changes...", MsgType::INFO);
-
-    this->temp_act->handle_changes(frame.temperature);
-    this->hum_act->handle_changes(frame.humidity);
-    this->moist_act->handle_changes(frame.soil_moisture);
-    this->co2_act->handle_changes(frame.co2);
-
-    Logger::get_instance()->log_out(ENV_CTRL_LOGS, "Finished handling changes", MsgType::INFO);
-}
-*/
-
 EnvControl::EnvControl(std::unique_ptr<Actuator> temp_act, std::unique_ptr<Actuator> hum_act, 
     std::unique_ptr<Actuator> moist_act, std::unique_ptr<Actuator> co2_act)
 {

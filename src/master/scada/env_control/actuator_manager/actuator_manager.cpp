@@ -1,7 +1,7 @@
 #include "actuator_manager.hpp"
 
 std::string ActuatorManager::config_to_string(std::vector<uint16_t>& params){
-    std::string message = "Updared actuator configurations: \n";
+    std::string message = "Updated actuator configurations: \n";
     message += "\tTemperature: perf= " + std::to_string(params[0]) + ", error: " + \
         std::to_string(params[1]) + "\n";
     
