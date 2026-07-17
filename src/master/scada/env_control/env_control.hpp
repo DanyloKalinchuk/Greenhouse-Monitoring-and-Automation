@@ -28,12 +28,11 @@ class EnvControl{
     std::unique_ptr<Radio> radio = nullptr;
     std::map<uint8_t, std::pair<SENS_FRAME, uint64_t>> last_records; ///< Holds last SENS_FRAME and the time when it was received for each registered Sensor
 
-    std::unique_ptr<ActuatorManager> actuator_manager = nullptr;
-
     std::thread comm_thread; ///< Radio communication thread
     std::mutex last_rec_mtx; ///< Mutex for last_records
 
     protected:
+    std::unique_ptr<ActuatorManager> actuator_manager = nullptr;
     std::atomic<bool> comm_on; ///< Keeps comm_thread alive
 
     /// \brief Calls Radio::handle_communications() and handles received SENS_FRAMEs
