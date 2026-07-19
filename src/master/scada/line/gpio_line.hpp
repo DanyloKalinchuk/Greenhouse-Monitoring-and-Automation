@@ -22,7 +22,7 @@ class GPIOLine : public Line {
     bool input; ///< Is True if the GPIO configured to the input mode, False otherwise
 
     protected:
-    void set_pin(uin8_t value);
+    void set_pin(uint8_t value);
 
     public:
     /**
