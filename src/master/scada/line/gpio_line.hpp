@@ -21,6 +21,9 @@ class GPIOLine : public Line {
     uint8_t pin; ///< GPIO pin handled by the class instance
     bool input; ///< Is True if the GPIO configured to the input mode, False otherwise
 
+    protected:
+    void set_pin(uin8_t value);
+
     public:
     /**
      * \brief Constructs GPIOLine class and acquires gpio resources
@@ -37,7 +40,7 @@ class GPIOLine : public Line {
      * 
      * \param value Represents Low logic level if 0, High otherwise
      */
-    void write(uint32_t value);
+    void write(uint32_t value) override;
 
     /// \brief Return logic level of the GPIO pin
     bool read();

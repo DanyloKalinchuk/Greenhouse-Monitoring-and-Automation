@@ -2,6 +2,18 @@
 
 #define GPIO_DIRECTION(input) ((input) ? GPIOD_LINE_DIRECTION_INPUT : GPIOD_LINE_DIRECTION_OUTPUT)
 
+void GPIOLine::set_pin(uint8_t value){
+	if (value == PIN_LOW){
+        if (gpiod_line_request_set_value(this->request, this->pin, GPIOD_LINE_VALUE_INACTIVE) < 0){
+            throw std::runtime_error("Failed to put the line LOW");
+        }
+    }else{
+        if (gpiod_line_request_set_value(this->request, this->pin, GPIOD_LINE_VALUE_ACTIVE) < 0){
+            throw std::runtime_error("Failed to put the line HIGH");
+        }
+    }
+}
+
 GPIOLine::GPIOLine(uint8_t pin, bool input) : Line(){
     this->pin = pin;
 	this->input = input;
@@ -68,15 +80,7 @@ GPIOLine::~GPIOLine(){
 }
 
 void GPIOLine::write(uint32_t value){
-    if (value == PIN_LOW){
-        if (gpiod_line_request_set_value(this->request, this->pin, GPIOD_LINE_VALUE_INACTIVE) < 0){
-            throw std::runtime_error("Failed to put the line HIGH");
-        }
-    }else{
-        if (gpiod_line_request_set_value(this->request, this->pin, GPIOD_LINE_VALUE_ACTIVE) < 0){
-            throw std::runtime_error("Failed to put the line LOW");
-        }
-    }
+    this->set_pin(value);
 }
 
 bool GPIOLine::read(){
