@@ -8,10 +8,10 @@ void PWMManualLine::sim_pwm_handler(){
         }
 
         this->set_pin(PIN_HIGH);
-        std::this_thread::sleep_for(std::chrono::microseconds(this->duty_cycle.load()));
+        std::this_thread::sleep_for(std::chrono::nanoseconds(this->duty_cycle.load()));
 
         this->set_pin(PIN_LOW);
-        std::this_thread::sleep_for(std::chrono::microseconds(this->period - this->duty_cycle.load()));
+        std::this_thread::sleep_for(std::chrono::nanoseconds(this->period - this->duty_cycle.load()));
     }
 }
 
