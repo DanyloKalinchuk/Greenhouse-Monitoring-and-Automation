@@ -99,7 +99,7 @@ void IPC::handle_data_request(){
 
 IPC::IPC() : env_control(
     std::make_unique<ActuatorServo>(std::make_unique<PWMLine>(PWM0, PERIOD, POS_INIT), 20, 5),
-    std::make_unique<Actuator>(std::make_unique<PWMManualLine>(5, PERIOD, POS_INIT), 60, 10),
+    std::make_unique<ActuatorServo>(std::make_unique<PWMManualLine>(5, PERIOD, POS_INIT), 60, 10),
     std::make_unique<Actuator>(10, 10),
     std::make_unique<Actuator>(10, 10)
 ) {
