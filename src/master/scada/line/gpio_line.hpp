@@ -22,6 +22,11 @@ class GPIOLine : public Line {
     bool input; ///< Is True if the GPIO configured to the input mode, False otherwise
 
     protected:
+    /**
+     * \brief Sets pin's state High or Low
+     * 
+     * \param value Determins new pin's state: Low if 0, High otherwise
+     */
     void set_pin(uint8_t value);
 
     public:
@@ -38,7 +43,7 @@ class GPIOLine : public Line {
      * \brief Set GPIO pin logic level
      * \attention Only applicable for output mode
      * 
-     * \param value Represents Low logic level if 0, High otherwise
+     * \param value Represents Low logic level if 0, High otherwise. Macros PIN_LOW and PIN_HIGH can be used instead of raw integer
      */
     void write(uint32_t value) override;
 
