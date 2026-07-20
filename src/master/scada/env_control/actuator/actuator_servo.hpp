@@ -21,6 +21,7 @@
 #define POS_INIT POS_CLOSED
 #define POS_OFF POS_CLOSED
 
+/// \brief Class for managing servo
 class ActuatorServo : public Actuator{
     public:
     ActuatorServo(std::unique_ptr<Line> line, int16_t init_perf, uint8_t init_error);

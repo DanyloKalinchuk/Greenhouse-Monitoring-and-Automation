@@ -164,7 +164,7 @@ def records(request):
 def config(request):
     parameters = [
         ["temp", 20, 5],
-        ["hum", 50, 20],
+        ["hum", 60, 10],
         ["moist", 70, 10],
         ["co2", 30, 10],
     ]
