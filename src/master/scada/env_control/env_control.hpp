@@ -21,7 +21,7 @@
 
 #define ENV_CTRL_LOGS ("env_ctrl_logs.log") ///< Path to the log output file
 
-#define ACTIVE_TIME_LIMIT_SEC 25 ///< 2.5 data readings on the sensor side
+#define ACTIVE_TIME_LIMIT_SEC 750 ///< 2.5 data readings on the sensor side
 
 /// \brief Class for managing Actuators and last SENS_FRAMEs received
 class EnvControl{

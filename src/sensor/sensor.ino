@@ -11,24 +11,29 @@
 #include <stdint.h>
 
 #include "dht11.hpp"
-#include "timer.hpp"
 #include "eeprom_ids.hpp"
 
 extern "C"{
   #include "adc.h"
+  #include "power_mode.h"
+  #include "timer.h"
+  #include "gpio.h"
 }
 
 #define INIT_PIPE 0 ///< Pipe number for the Sensor initialization
 
+#define CO2_CTRL_PIN 0
+#define RESET_BTN_PIN 2
 #define DHT11_PIN 4 ///< Pin to which the DHT11 sensor is connected
 #define MOIST_PIN 2 ///< Soil Moisture sensor pin
 #define CO2_PIN 3 ///< CO2 sensor pin
 #define CE 7 ///< CE line of the nRF24L01 module
 #define CS 10 ///< CS line of the nRF24L01 module
 
-#define ADC_MAX_VAL 1023
+#define ADC_MAX_VAL 1023.0
 
-#define SENSOR_DELAY 10000 ///< Delay for the sensor data sending loop
+#define SENSOR_DELAY 5 ///< Delay in minutes for the sensor data sending loop
+#define RESET_BTN_DELAY 10 ///< Time in seconds the reset button should be hold to reset sensor with setting master id to MASTER_DEFAULT
 
 const uint8_t init_address[] = "init_address"; ///< Address for Sensor initialization. Must be identical to the INIT_ADDRESS in \ref radio_comm.hpp
 mstr_sens_ids::M_S_IDS ms_ids = mstr_sens_ids::read();
@@ -41,8 +46,19 @@ uint8_t moist_line = init_adc_line(MOIST_PIN);
 uint8_t co2_line = init_adc_line(CO2_PIN);
 uint16_t adc_raw;
 
-Timer timer(TIMER_UNITS::TIMER_MS);
-volatile uint8_t timer_flag; ///< Flag set by the Timer's ISR
+volatile uint8_t timer2_flag = 1; ///< Flag set by the Timer's ISR
+volatile uint8_t timer1_flag = 0;
+volatile uint8_t reset_flag = 0;
+
+const struct gpio_pin co2_pin = {
+  .pin = CO2_CTRL_PIN,
+  .port = PIN_PORT_B
+};
+
+const struct gpio_pin reset_pin = {
+  .pin = RESET_BTN_PIN,
+  .port = PIN_PORT_D
+};
 
 /**
  * \brief Initializes Sensor
@@ -73,8 +89,16 @@ void setup() {
   radio.stopListening();
   radio.openWritingPipe((uint64_t)ms_ids.master);
 
-  timer.start(SENSOR_DELAY);
-  wdt_enable(WDTO_2S);
+  pin_init(&co2_pin, PIN_OUT);
+  pin_set(&co2_pin, PIN_HIGH);
+
+  //pin_init(&reset_pin, PIN_IN);
+  //pin_set_interrupt(&reset_pin, EXT_TOGGLE);
+
+  //timer1_init(RESET_BTN_DELAY);
+
+  timer2_init(SENSOR_DELAY);
+  timer2_start();
   sei();
 }
 
@@ -83,11 +107,9 @@ void setup() {
  * Resets WDT. If timer_flag is set, reads and sends sensor data to Master
  */
 void loop() {
-  wdt_reset();
+  wdt_enable(WDTO_2S);
 
-  if (timer_flag){
-    timer_flag = 0;
-
+  if (timer2_flag){
     dht_data = dht.read();
     uint32_t data_to_send[5];
 
@@ -100,18 +122,54 @@ void loop() {
     data_to_send[0] = (uint32_t)(ms_ids.sensor);
     data_to_send[1] = (uint32_t)(dht_data.humidity);
     data_to_send[2] = (uint32_t)(dht_data.temperature);
-    data_to_send[3] = soil_moisture;
-    data_to_send[4] = co2;
+    data_to_send[3] = co2;
+    data_to_send[4] = soil_moisture;
 
     radio.write(data_to_send, sizeof(data_to_send));
+
+    pin_set(&co2_pin, PIN_LOW);
+    timer2_flag = 0;
+    timer2_delay_counter_reset();
   }
 
+  while (timer1_flag){
+    wdt_reset();
+    if (reset_flag){
+      mstr_sens_ids::update_master(MASTER_DEFAULT);
+      while (1){}
+    }
+  }
+
+  wdt_disable();
+  timer2_tcnt2_reset();
+  pm_sleep(POWER_SAVE_MODE);
 }
 
-ISR(TIMER1_COMPA_vect){
-  timer.inc_passed();
+ISR(TIMER2_OVF_vect){
+  switch (timer2_inc()){
+    case TIM_OVF:
+      timer2_flag = 1;
+      break;
+    case TIM_PRE_OVF:
+      pin_set(&co2_pin, PIN_HIGH);
+      break;
+    default:
+      break;
+  }
+}
 
-  if (timer.comp_passed_delay()){
-    timer_flag = 1;
+ISR(TIMER1_OVF_vect){
+  if (timer1_inc()){
+    reset_flag = 1;
+  }
+}
+
+ISR(INT0_vect){
+  if (pin_read(&reset_pin)){
+    timer1_flag = 1;
+    timer1_start();
+  }else{
+    timer1_stop();
+    timer1_flag = 0;
   }
 }
