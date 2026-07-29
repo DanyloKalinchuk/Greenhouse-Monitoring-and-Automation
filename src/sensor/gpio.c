@@ -1,6 +1,6 @@
 #include "gpio.h"
 
-void pin_init(struct gpio_pin *pin, uint8_t dir){
+uint8_t pin_init(struct gpio_pin *pin, uint8_t dir){
   if (pin->pin > 7 || pin->pin < 0){
     return -1;
   }

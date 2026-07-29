@@ -7,7 +7,7 @@
 
 #define OVFS_PER_SEC (F_CPU / 1024 / 256)
 #define OVFS_PER_MIN OVFS_PER_SEC * 60
-#define T1_OVFS_PER_SEC (F_CPU / 1024)
+#define T1_OVFS_PER_SEC ((double)F_CPU / 1024.0 / 65536.0)
 
 static uint32_t timer2_delay_ovf;
 static uint32_t timer2_delay_pre_ovf;
@@ -16,9 +16,9 @@ static uint32_t timer2_delay_counter = 0;
 static uint16_t timer1_delay_ovf;
 static uint16_t timer1_delay_counter;
 
-void timer2_init(uint32_t delay_m){
+void timer2_init(uint32_t delay_m, uint32_t pre_ovf_delay_s){
   timer2_delay_ovf = delay_m * OVFS_PER_MIN;
-  timer2_delay_pre_ovf = (delay_m - 1) * OVFS_PER_MIN;
+  timer2_delay_pre_ovf = timer2_delay_ovf - (pre_ovf_delay_s * OVFS_PER_SEC);
 
   TCCR2A = 0x00;
   TCCR2B = TCCR2B_CS;
@@ -51,8 +51,8 @@ uint8_t timer2_inc(void){
   return 0;
 }
 
-void timer1_init(uint8_t delay_s){
-  timer1_delay_ovf = ((uint32_t)delay_s * T1_OVFS_PER_SEC) / 65536;
+void timer1_init(uint32_t delay_s){
+  timer1_delay_ovf = delay_s * T1_OVFS_PER_SEC;
 
   TCCR1A = 0x00;
   TCCR1B = TCCR0B_CS;
