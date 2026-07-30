@@ -138,6 +138,8 @@ void loop() {
     data_to_send[4] = soil_moisture;
 
     radio.write(data_to_send, sizeof(data_to_send));
+
+    radio.powerDown();
     pin_set(&periph_pin, PIN_LOW);
     timer2_flag = 0;
     timer2_delay_counter_reset();
@@ -170,6 +172,8 @@ ISR(TIMER2_OVF_vect){
       timer2_flag = 1;
       break;
     case TIM_PRE_OVF:
+      radio.powerUp();
+
       pin_set(&periph_pin, PIN_HIGH);
       pin_set(&led_active, PIN_HIGH);
       break;

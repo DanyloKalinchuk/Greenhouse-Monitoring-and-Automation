@@ -2,7 +2,7 @@ import threading
 from web_ipc import IPC, SensFrame
 
 SOCKET_PATH = "/tmp/SCADA_SOCK"
-REQ_DELAY_SEC = 300
+REQ_DELAY_SEC = 900
 
 class Web:
     _instance = None
