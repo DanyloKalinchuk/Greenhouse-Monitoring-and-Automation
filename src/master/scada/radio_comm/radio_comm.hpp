@@ -17,10 +17,10 @@
 /// \brief Contains data received from Sensor
 struct SENS_FRAME{
     uint8_t sensor_id;
-    uint32_t humidity;
-    uint32_t temperature;
-    uint32_t co2;
-    uint32_t soil_moisture;
+    uint8_t humidity;
+    int8_t temperature;
+    uint8_t co2;
+    uint8_t soil_moisture;
 };
 
 /**

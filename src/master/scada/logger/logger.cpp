@@ -66,7 +66,7 @@ void Logger::queue_handling(){
             struct LogQObj queue_object;
             {
                 std::lock_guard<std::mutex> queue_lock(this->queue_mtx);
-                queue_object  = this->log_queue.front();
+                queue_object = this->log_queue.front();
                 this->log_queue.pop();
             }
 
