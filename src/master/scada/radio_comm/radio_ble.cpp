@@ -5,7 +5,7 @@ void Radio_BLE::interfaces_added_handler(sdbus::Signal signal){
     signal >> device_path;
 
     std::lock_guard<std::mutex> queue_lock(this->queue_mtx);
-    this->queue.push(device_path);
+    this->device_queue.push(device_path);
     this->queue_is_ready.store(true);
     this->queue_cv.notify_all();
 }
@@ -13,27 +13,39 @@ void Radio_BLE::interfaces_added_handler(sdbus::Signal signal){
 Radio_BLE::Radio_BLE() : Radio(){
     this->conn = sdbus::createSystemBusConnection();
 
-    auto obj_manager_proxy = sdbus::createProxy(*this->conn, Radio_BLE::bluez_service, Radio_BLE::obj_manager_path);
+    sdbus::ServiceName bluez_service{"org.bluez"};
+
+    sdbus::ObjectPath obj_manager_path{"/"};
+    sdbus::InterfaceName obj_manager_interface{"org.freedesktop.DBus.ObjectManager"};
+
+    sdbus::ObjectPath adapter_path{"/org/bluez/hci0"};
+    sdbus::InterfaceName adapter_interface{"org.bluez.Adapter1"};
+
+    auto obj_manager_proxy = sdbus::createProxy(*this->conn, bluez_service, obj_manager_path);
     
     sdbus::SignalName interfaces_added_signal{"InterfacesAdded"};
     obj_manager_proxy->registerSignalHandler(obj_manager_interface, interfaces_added_signal, 
-        [this] (sdbus::Signal signal) {this->interfaces_added_handler(signal)});
+        [this] (sdbus::Signal signal) {this->interfaces_added_handler(signal);});
     
-    auto adapter_proxy = sdbus::createProxy(*this->conn, Radio_BLE::bluez_service, Radio_BLE::adapter_path);
+    auto adapter_proxy = sdbus::createProxy(*this->conn, bluez_service, adapter_path);
 
     std::map<std::string, sdbus::Variant> filter;
     filter["UUIDs"] = sdbus::Variant{std::vector<std::string>{UUID_FILTER}};
 
-    adapter_proxy->callMethod("SetDiscoveryFilter").onInterface(Radio_BLE::adapter_interface).withArguments(filter);
-    adapter_proxy->callMethod("StartDiscovery").onInterface(Radio_BLE::adapter_interface);
+    adapter_proxy->callMethod("SetDiscoveryFilter").onInterface(adapter_interface).withArguments(filter);
+    adapter_proxy->callMethod("StartDiscovery").onInterface(adapter_interface);
 }
 
 Radio_BLE::~Radio_BLE(){
     this->queue_is_ready.store(true);
     this->queue_cv.notify_all();
 
-    auto adapter_proxy = sdbus::createProxy(*this->conn, Radio_BLE::bluez_service, Radio_BLE::adapter_path);
-    adapter_proxy->callMethod("StopDiscovery").onInterface(Radio_BLE::adapter_interface);
+    sdbus::ServiceName bluez_service{"org.bluez"};
+    sdbus::ObjectPath adapter_path{"/org/bluez/hci0"};
+    sdbus::InterfaceName adapter_interface{"org.bluez.Adapter1"};
+
+    auto adapter_proxy = sdbus::createProxy(*this->conn, bluez_service, adapter_path);
+    adapter_proxy->callMethod("StopDiscovery").onInterface(adapter_interface);
 }
 
 SENS_FRAME Radio_BLE::handle_communications(){
@@ -60,8 +72,10 @@ SENS_FRAME Radio_BLE::handle_communications(){
         }
     }
 
-    auto device_proxy = sdbus::createProxy(*this->conn, Radio_BLE::bluez_service, device_path);
-    sdbus::Variant property = device_proxy->getProperty("ServiceData").onInterface(Radio_BLE::device_interface);
+    sdbus::InterfaceName device_interface{"org.bluez.Device1"};
+
+    auto device_proxy = sdbus::createProxy(*this->conn, bluez_service, device_path);
+    sdbus::Variant property = device_proxy->getProperty("ServiceData").onInterface(device_interface);
     std::map<std::string, sdbus::Variant> service_data = property.get<std::map<std::string, std::Variant>>();
     std::vector<uint8_t> data = service_data.at(UUID_FILTER).get<std::vector<uint8_t>>();
 

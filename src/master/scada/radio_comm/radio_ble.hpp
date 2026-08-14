@@ -16,16 +16,6 @@
 #define UUID_FILTER "0000181a-0000-1000-0000-00005f9b34fb"
 
 class Radio_BLE : public Radio{
-    static const sdbus::ServiceName bluez_service{"org.bluez"};
-
-    static const sdbus::ObjectPath obj_manager_path{"/"};
-    static const sdbus::InterfaceName obj_manager_interface{"org.freedesktop.DBus.ObjectManager"};
-
-    static const sdbus::OpbjectPath adapter_path{"/org/bluez/hci0"};
-    static const sdbus::InterfaceName adapter_interface{"org.bluez.Adapter1"};
-
-    static const sdbus::InterfaceName device_interface{"org.bluez.Device1"};
-
     std::queue<sdbus::ObjectPath> device_queue;
     std::mutex queue_mtx;
     std::atomic<bool> queue_is_ready;
