@@ -13,7 +13,7 @@
 #include <atomic>
 #include <condition_variable>
 
-#define UUID_FILTER "0000181a-0000-1000-0000-00005f9b34fb"
+#define UUID_FILTER "0000181a-0000-1000-8000-00805f9b34fb"
 
 class Radio_BLE : public Radio{
     std::queue<sdbus::ObjectPath> device_queue;
@@ -23,6 +23,7 @@ class Radio_BLE : public Radio{
     std::mutex queue_cv_mtx;
 
     std::unique_ptr<sdbus::IConnection> conn;
+    std::unique_ptr<sdbus::IProxy> obj_manager_proxy;
 
     void interfaces_added_handler(sdbus::Signal signal);
 

@@ -4,16 +4,15 @@ set(CMAKE_CXX_STANDARD 20)
 
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/logs/test)
 
-file(GLOB_RECURSE SCADA_SRC CONFIGURE_DEPENDS "src/master/scada/*.cpp")
-list(FILTER SCADA_SRC EXCLUDE REGEX ".*/tests/.*")
-
-add_executable(scada_process ${SCADA_SRC})
-target_compile_definitions(scada_process PRIVATE 
-  RADIO_OPTION_RF24
-)
-target_link_libraries(scada_process rf24 pthread gpiod)
-
 include(FetchContent)
+
+FetchContent_Declare(
+  sdbus-cpp
+  GIT_REPOSITORY https://github.com/Kistler-Group/sdbus-cpp
+  GIT_TAG v2.3.1
+)
+FetchContent_MakeAvailable(sdbus-cpp)
+
 FetchContent_Declare(
   googletest
   URL https://github.com/google/googletest/archive/5376968f6948923e2411081fd9372e71a59d8e77.zip
@@ -21,6 +20,17 @@ FetchContent_Declare(
 
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
+
+file(GLOB_RECURSE SCADA_SRC CONFIGURE_DEPENDS "src/master/scada/*.cpp")
+list(FILTER SCADA_SRC EXCLUDE REGEX ".*/tests/.*")
+
+add_executable(scada_process ${SCADA_SRC})
+target_compile_definitions(scada_process PRIVATE 
+  RADIO_OPTION_RF24
+)
+
+target_compile_options(scada_process PRIVATE -fcoroutines)
+target_link_libraries(scada_process rf24 pthread gpiod SDBusCpp::sdbus-c++)
 
 file(GLOB_RECURSE SCADA_TEST_SRC CONFIGURE_DEPENDS "src/master/scada/*.cpp")
 list(FILTER SCADA_TEST_SRC EXCLUDE REGEX ".*/scada.cpp*")
@@ -31,5 +41,6 @@ target_compile_definitions(scada_tests PRIVATE
   LOGS_BASE_DIR="logs/test/"
   RADIO_OPTION_RF24
 )
-target_link_libraries(scada_tests gtest rf24 pthread gpiod)
+target_compile_options(scada_tests PRIVATE -fcoroutines)
+target_link_libraries(scada_tests gtest rf24 pthread gpiod SDBusCpp::sdbus-c++)
 add_test(NAME ScadaTests COMMAND scada_tests)

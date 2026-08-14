@@ -28,15 +28,6 @@ struct SENS_FRAME{
  * Contains logic for Sensor registration/initialization and logging radio communication events
  */
 class Radio{
-    protected:
-    /**
-     * \brief Packs sensor_data array into a SENS_FRAME structure
-     * 
-     * \param[in] sensor_data Data received from a Sensor
-     * \param[out] sens_frame Pointer to a SENS_FRAME structure
-     */
-    virtual void sensor_handle_data(uint32_t sensor_data[SENSOR_DATA_SIZE], SENS_FRAME* sens_frame) = 0;
-
     public:
     /**
      * \brief Handles radio communication
