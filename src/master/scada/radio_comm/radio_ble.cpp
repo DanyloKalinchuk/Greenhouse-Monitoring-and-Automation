@@ -36,7 +36,7 @@ Radio_BLE::Radio_BLE() : Radio(){
     adapter_proxy->callMethod("SetDiscoveryFilter").onInterface(adapter_interface).withArguments(filter);
     adapter_proxy->callMethod("StartDiscovery").onInterface(adapter_interface);
 
-    Logger::get_instance()->log_out("Discovery started", MsgType::INFO);
+    Logger::get_instance()->log_out(RADIO_LOGS_PATH, "Discovery started", MsgType::INFO);
 }
 
 Radio_BLE::~Radio_BLE(){

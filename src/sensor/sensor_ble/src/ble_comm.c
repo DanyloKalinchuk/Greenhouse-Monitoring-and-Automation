@@ -8,7 +8,7 @@
 LOG_MODULE_REGISTER(ble_comm, LOG_LEVEL_ERR);
 
 static const struct bt_le_adv_param *adv_param = BT_LE_ADV_PARAM(
-    BT_LE_ADV_OPT_SCANNABLE,
+    BT_LE_ADV_OPT_NONE,
     320,
     320,
     NULL
@@ -29,10 +29,6 @@ static const struct bt_data ad[] = {
     BT_DATA(BT_DATA_NAME_COMPLETE, DEVICE_NAME, DEVICE_NAME_LEN),
     BT_DATA_BYTES(BT_DATA_UUID16_ALL, BT_UUID_16_ENCODE(ENV_SENSING_SERV_UUID)),
     BT_DATA(BT_DATA_SVC_DATA16, (unsigned char *)&service_data, sizeof(service_data)),
-};
-
-static struct bt_data sd[] = {
-    
 };
 
 uint8_t ble_init(void){
