@@ -24,7 +24,7 @@ class Radio_RF24 : public Radio{
      * \param[in] sensor_data Data received from a Sensor
      * \param[out] sens_frame Pointer to a SENS_FRAME structure
      */
-    void sensor_handle_data(uint32_t sensor_data[SENSOR_DATA_SIZE], SENS_FRAME* sens_frame) override;
+    void sensor_handle_data(uint32_t sensor_data[SENSOR_DATA_SIZE], SENS_FRAME* sens_frame);
 
     public:
     Radio_RF24();
